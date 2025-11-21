@@ -3,7 +3,6 @@ const HistoryRoomStatus = require('../models/history_room_status');
 
 const getAllRooms = async (req, res) => {
     try {
-        // Join với Room_Types để lấy tên loại phòng
         const query = `
             SELECT r.*, rt.name as room_type_name 
             FROM Rooms r 
@@ -17,30 +16,61 @@ const getAllRooms = async (req, res) => {
     }
 };
 
-const updateRoomStatus = async (req, res) => {
-    // Logic thay đổi trạng thái phòng (VD: available -> occupied)
-    // Cần thêm cột 'status' vào bảng Rooms nếu file SQL chưa có, hoặc giả định bảng Rooms có cột này.
-    // Dựa trên file SQL bạn cung cấp: Bảng Rooms KHÔNG CÓ cột status (chỉ có is_active?).
-    // Tuy nhiên, tôi sẽ giả định logic này cập nhật trạng thái 'is_active' hoặc một cột logic.
-    
+const getRoomById = async (req, res) => {
     const { id } = req.params;
-    const { status } = req.body; // VD: true/false cho is_active
+    try {
+        const result = await db.query('SELECT * FROM Rooms WHERE room_id = $1', [id]);
+        if (result.rows.length === 0) return res.status(404).json({ message: 'Room not found' });
+        res.json(result.rows[0]);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+};
+
+const createRoom = async (req, res) => {
+    const { room_number, room_type_id, floor, price_per_night, max_guests, bed_count, description, status, is_active } = req.body;
+    try {
+        const result = await db.query(
+            'INSERT INTO Rooms (room_number, room_type_id, floor, price_per_night, max_guests, bed_count, description, status, is_active) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING *',
+            [room_number, room_type_id, floor, price_per_night, max_guests, bed_count, description, status || 'available', is_active !== undefined ? is_active : true]
+        );
+        res.status(201).json(result.rows[0]);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+};
+
+const updateRoom = async (req, res) => {
+    const { id } = req.params;
+    const { room_number, room_type_id, floor, price_per_night, max_guests, bed_count, description, status, is_active } = req.body;
+    try {
+        const result = await db.query(
+            'UPDATE Rooms SET room_number=$1, room_type_id=$2, floor=$3, price_per_night=$4, max_guests=$5, bed_count=$6, description=$7, status=$8, is_active=$9 WHERE room_id=$10 RETURNING *',
+            [room_number, room_type_id, floor, price_per_night, max_guests, bed_count, description, status, is_active, id]
+        );
+        if (result.rows.length === 0) return res.status(404).json({ message: 'Room not found' });
+        res.json(result.rows[0]);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+};
+
+const updateRoomStatus = async (req, res) => {
+    const { id } = req.params;
+    const { status } = req.body; 
     const userId = req.user ? req.user.user_id : 0;
 
     try {
-        // 1. Get old status
-        const oldRoom = await db.query('SELECT is_active FROM Rooms WHERE room_id = $1', [id]);
+        const oldRoom = await db.query('SELECT status FROM Rooms WHERE room_id = $1', [id]);
         if (oldRoom.rows.length === 0) return res.status(404).json({ message: 'Room not found' });
         
-        const oldStatus = oldRoom.rows[0].is_active;
+        const oldStatus = oldRoom.rows[0].status;
 
-        // 2. Update
         const result = await db.query(
-            'UPDATE Rooms SET is_active = $1 WHERE room_id = $2 RETURNING *',
+            'UPDATE Rooms SET status = $1 WHERE room_id = $2 RETURNING *',
             [status, id]
         );
 
-        // 3. Log history (Model Requirement)
         await HistoryRoomStatus.logStatusChange(id, oldStatus, status, userId);
 
         res.json({ message: 'Room status updated', room: result.rows[0] });
@@ -49,4 +79,15 @@ const updateRoomStatus = async (req, res) => {
     }
 };
 
-module.exports = { getAllRooms, updateRoomStatus };
+const deleteRoom = async (req, res) => {
+    const { id } = req.params;
+    try {
+        const result = await db.query('DELETE FROM Rooms WHERE room_id = $1 RETURNING room_id', [id]);
+        if (result.rows.length === 0) return res.status(404).json({ message: 'Room not found' });
+        res.json({ message: 'Room deleted' });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+};
+
+module.exports = { getAllRooms, getRoomById, createRoom, updateRoom, updateRoomStatus, deleteRoom };
