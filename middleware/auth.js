@@ -8,7 +8,7 @@ const authMiddleware = async (req, res, next) => {
             return res.status(401).json({ message: 'Unauthorized: Missing User ID' });
         }
 
-        const result = await db.query('SELECT * FROM Users WHERE user_id = $1 AND is_active = TRUE', [userId]);
+        const result = await db.query('SELECT * FROM Users WHERE user_id = $1 ', [userId]);
 
         if (result.rows.length === 0) {
             return res.status(403).json({ message: 'Forbidden: Invalid User' });
