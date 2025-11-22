@@ -1,9 +1,8 @@
 const InvoiceService = require('../services/invoiceService');
 const InvoiceRepository = require('../repositories/invoiceRepository');
-const Invoice = require('../models/invoice');
+const db = require('../config/db'); // Import DB trực tiếp cho các query đơn giản
 
 const InvoiceController = {
-    // Xem trước tính toán hóa đơn (Preview)
     previewInvoice: async (req, res) => {
         try {
             const { bookingId, promoCode } = req.body;
@@ -14,13 +13,12 @@ const InvoiceController = {
         }
     },
 
-    // Tạo hóa đơn chính thức
     createInvoice: async (req, res) => {
         try {
             const { bookingId, promoCode } = req.body;
-            const staffId = req.user ? req.user.user_id : 1; // Fallback if no auth middleware used in testing
+            const staffId = req.user ? req.user.user_id : 1;
             const invoice = await InvoiceService.createInvoice(staffId, bookingId, promoCode);
-            res.status(201).json({ message: 'Hóa đơn đã được tạo và gửi email', invoice });
+            res.status(201).json({ message: 'Hóa đơn đã được tạo', invoice });
         } catch (error) {
             res.status(400).json({ message: error.message });
         }
@@ -36,11 +34,35 @@ const InvoiceController = {
         }
     },
 
+    // --- MỚI: GET ALL ---
+    getAllInvoices: async (req, res) => {
+        try {
+            const result = await db.query('SELECT * FROM Invoices ORDER BY issue_date DESC');
+            res.json(result.rows);
+        } catch (error) {
+            res.status(500).json({ message: error.message });
+        }
+    },
+
     updatePayment: async (req, res) => {
         try {
-            const { status, method } = req.body;
-            const updated = await Invoice.updatePaymentStatus(req.params.id, status, method);
-            res.json(updated);
+            const { status, method } = req.body; // status: 'paid' / 'unpaid'
+            const result = await db.query(
+                'UPDATE Invoices SET payment_status = $1, payment_method = $2 WHERE invoice_id = $3 RETURNING *',
+                [status, method, req.params.id]
+            );
+            res.json(result.rows[0]);
+        } catch (error) {
+            res.status(500).json({ message: error.message });
+        }
+    },
+
+    // --- MỚI: DELETE ---
+    deleteInvoice: async (req, res) => {
+        try {
+            const result = await db.query('DELETE FROM Invoices WHERE invoice_id = $1 RETURNING *', [req.params.id]);
+            if (result.rows.length === 0) return res.status(404).json({ message: 'Invoice not found' });
+            res.json({ message: 'Invoice deleted successfully' });
         } catch (error) {
             res.status(500).json({ message: error.message });
         }
