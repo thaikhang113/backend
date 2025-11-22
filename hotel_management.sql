@@ -2,35 +2,9 @@
 -- DATABASE: Hotel Management System
 -- ============================================
 
--- Clean up
-DROP TABLE IF EXISTS Room_Status_History, Reviews, Invoices, Used_Services, Services, Booked_Rooms, Bookings, Rooms, Room_Types, Promotions, Users;
--- ============================================
--- STEP 1: SCHEMA UPDATE
--- ============================================
+-- Clean up existing tables if any
+DROP TABLE IF EXISTS Room_Status_History, Reviews, Invoices, Used_Services, Services, Booked_Rooms, Bookings, Rooms, Room_Types, Promotions, Users, Reports CASCADE;
 
--- 1. Update Users Table (For OTP & Auth)
-ALTER TABLE Users 
-ADD COLUMN IF NOT EXISTS otp_code VARCHAR(10),
-ADD COLUMN IF NOT EXISTS otp_expires_at TIMESTAMP,
-ADD COLUMN IF NOT EXISTS last_login TIMESTAMP;
-
--- 2. Update Promotions Table (For Usage Limits)
-ALTER TABLE Promotions 
-ADD COLUMN IF NOT EXISTS usage_limit INTEGER DEFAULT 100,
-ADD COLUMN IF NOT EXISTS used_count INTEGER DEFAULT 0;
-
--- 3. Create Reports Table (New Feature)
-CREATE TABLE IF NOT EXISTS Reports (
-    report_id SERIAL PRIMARY KEY,
-    title VARCHAR(255) NOT NULL,
-    report_type VARCHAR(50) NOT NULL, -- 'daily', 'monthly', 'revenue', 'service_usage'
-    start_date DATE,
-    end_date DATE,
-    total_revenue DECIMAL(15, 2) DEFAULT 0,
-    generated_content TEXT, -- JSON or Summary text
-    created_by INTEGER REFERENCES Users(user_id),
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
 -- ==========================
 -- TABLE: Users
 -- ==========================
@@ -47,7 +21,11 @@ CREATE TABLE Users (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     date_of_birth DATE,
     is_staff BOOLEAN DEFAULT FALSE,
-    is_active BOOLEAN DEFAULT TRUE
+    is_active BOOLEAN DEFAULT TRUE,
+    -- Added columns directly here
+    otp_code VARCHAR(10),
+    otp_expires_at TIMESTAMP,
+    last_login TIMESTAMP
 );
 
 -- ==========================
@@ -56,7 +34,8 @@ CREATE TABLE Users (
 CREATE TABLE Room_Types (
     room_type_id SERIAL PRIMARY KEY,
     name VARCHAR(100) UNIQUE NOT NULL,
-    description TEXT
+    description TEXT,
+    is_active BOOLEAN DEFAULT TRUE
 );
 
 -- ==========================
@@ -72,7 +51,7 @@ CREATE TABLE Rooms (
     bed_count INTEGER,
     description TEXT,
     status VARCHAR(20) DEFAULT 'available',
-    is_active BOOLEAN DEFAULT TRUE -- Column added per requirement
+    is_active BOOLEAN DEFAULT TRUE
 );
 
 -- ==========================
@@ -99,7 +78,10 @@ CREATE TABLE Promotions (
     end_date DATE,
     is_active BOOLEAN DEFAULT TRUE,
     scope VARCHAR(20) DEFAULT 'invoice',
-    description TEXT
+    description TEXT,
+    -- Added columns directly here
+    usage_limit INTEGER DEFAULT 100,
+    used_count INTEGER DEFAULT 0
 );
 
 -- ==========================
@@ -182,32 +164,47 @@ CREATE TABLE Room_Status_History (
     changed_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
+-- ==========================
+-- TABLE: Reports (New Feature)
+-- ==========================
+CREATE TABLE Reports (
+    report_id SERIAL PRIMARY KEY,
+    title VARCHAR(255) NOT NULL,
+    report_type VARCHAR(50) NOT NULL, 
+    start_date DATE,
+    end_date DATE,
+    total_revenue DECIMAL(15, 2) DEFAULT 0,
+    generated_content TEXT,
+    created_by INTEGER REFERENCES Users(user_id),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
 -- ============================================
--- DATA INSERTION (Extended Dataset)
+-- DATA INSERTION
 -- ============================================
 
 -- USERS
-INSERT INTO Users (password_hash, username, email, first_name, last_name, gender, phone_number, address, date_of_birth, is_staff) VALUES
-('hash1', 'user1', 'user1@mail.com', 'First1', 'Last1', 'Female', '0900000001', 'City1', '1993-09-11', TRUE),
-('hash2', 'user2', 'user2@mail.com', 'First2', 'Last2', 'Male', '0900000002', 'City2', '1998-03-21', TRUE),
-('hash3', 'user3', 'user3@mail.com', 'First3', 'Last3', 'Female', '0900000003', 'City3', '1991-07-19', FALSE),
-('hash4', 'user4', 'user4@mail.com', 'First4', 'Last4', 'Male', '0900000004', 'City4', '1993-08-26', FALSE),
-('hash5', 'user5', 'user5@mail.com', 'First5', 'Last5', 'Female', '0900000005', 'City5', '1997-02-17', FALSE),
-('hash6', 'user6', 'user6@mail.com', 'First6', 'Last6', 'Male', '0900000006', 'City6', '1990-08-28', TRUE),
-('hash7', 'user7', 'user7@mail.com', 'First7', 'Last7', 'Female', '0900000007', 'City7', '1996-08-19', FALSE),
-('hash8', 'user8', 'user8@mail.com', 'First8', 'Last8', 'Male', '0900000008', 'City8', '1991-03-16', FALSE),
-('hash9', 'user9', 'user9@mail.com', 'First9', 'Last9', 'Female', '0900000009', 'City9', '1990-02-15', FALSE),
-('hash10', 'user10', 'user10@mail.com', 'First10', 'Last10', 'Male', '0900000010', 'City10', '1990-07-13', TRUE),
-('hash11', 'user11', 'user11@mail.com', 'First11', 'Last11', 'Female', '0900000011', 'City11', '1999-02-25', TRUE),
-('hash12', 'user12', 'user12@mail.com', 'First12', 'Last12', 'Male', '0900000012', 'City12', '1991-05-15', TRUE),
-('hash13', 'user13', 'user13@mail.com', 'First13', 'Last13', 'Female', '0900000013', 'City13', '1998-07-21', FALSE),
-('hash14', 'user14', 'user14@mail.com', 'First14', 'Last14', 'Male', '0900000014', 'City14', '1994-04-27', FALSE),
-('hash15', 'user15', 'user15@mail.com', 'First15', 'Last15', 'Female', '0900000015', 'City15', '1998-08-22', FALSE),
-('hash16', 'user16', 'user16@mail.com', 'First16', 'Last16', 'Male', '0900000016', 'City16', '1996-07-27', FALSE),
-('hash17', 'user17', 'user17@mail.com', 'First17', 'Last17', 'Female', '0900000017', 'City17', '1995-04-14', TRUE),
-('hash18', 'user18', 'user18@mail.com', 'First18', 'Last18', 'Male', '0900000018', 'City18', '1997-07-20', TRUE),
-('hash19', 'user19', 'user19@mail.com', 'First19', 'Last19', 'Female', '0900000019', 'City19', '1991-05-22', TRUE),
-('hash20', 'user20', 'user20@mail.com', 'First20', 'Last20', 'Male', '0900000020', 'City20', '1997-05-17', TRUE);
+INSERT INTO Users (password_hash, username, email, first_name, last_name, gender, phone_number, address, date_of_birth, is_staff, otp_code, otp_expires_at) VALUES
+('hash1', 'user1', 'user1@mail.com', 'First1', 'Last1', 'Female', '0900000001', 'City1', '1993-09-11', TRUE, '123456', NOW() + INTERVAL '10 minutes'),
+('hash2', 'user2', 'user2@mail.com', 'First2', 'Last2', 'Male', '0900000002', 'City2', '1998-03-21', TRUE, '654321', NOW() - INTERVAL '10 minutes'),
+('hash3', 'user3', 'user3@mail.com', 'First3', 'Last3', 'Female', '0900000003', 'City3', '1991-07-19', FALSE, NULL, NULL),
+('hash4', 'user4', 'user4@mail.com', 'First4', 'Last4', 'Male', '0900000004', 'City4', '1993-08-26', FALSE, NULL, NULL),
+('hash5', 'user5', 'user5@mail.com', 'First5', 'Last5', 'Female', '0900000005', 'City5', '1997-02-17', FALSE, NULL, NULL),
+('hash6', 'user6', 'user6@mail.com', 'First6', 'Last6', 'Male', '0900000006', 'City6', '1990-08-28', TRUE, NULL, NULL),
+('hash7', 'user7', 'user7@mail.com', 'First7', 'Last7', 'Female', '0900000007', 'City7', '1996-08-19', FALSE, NULL, NULL),
+('hash8', 'user8', 'user8@mail.com', 'First8', 'Last8', 'Male', '0900000008', 'City8', '1991-03-16', FALSE, NULL, NULL),
+('hash9', 'user9', 'user9@mail.com', 'First9', 'Last9', 'Female', '0900000009', 'City9', '1990-02-15', FALSE, NULL, NULL),
+('hash10', 'user10', 'user10@mail.com', 'First10', 'Last10', 'Male', '0900000010', 'City10', '1990-07-13', TRUE, NULL, NULL),
+('hash11', 'user11', 'user11@mail.com', 'First11', 'Last11', 'Female', '0900000011', 'City11', '1999-02-25', TRUE, NULL, NULL),
+('hash12', 'user12', 'user12@mail.com', 'First12', 'Last12', 'Male', '0900000012', 'City12', '1991-05-15', TRUE, NULL, NULL),
+('hash13', 'user13', 'user13@mail.com', 'First13', 'Last13', 'Female', '0900000013', 'City13', '1998-07-21', FALSE, NULL, NULL),
+('hash14', 'user14', 'user14@mail.com', 'First14', 'Last14', 'Male', '0900000014', 'City14', '1994-04-27', FALSE, NULL, NULL),
+('hash15', 'user15', 'user15@mail.com', 'First15', 'Last15', 'Female', '0900000015', 'City15', '1998-08-22', FALSE, NULL, NULL),
+('hash16', 'user16', 'user16@mail.com', 'First16', 'Last16', 'Male', '0900000016', 'City16', '1996-07-27', FALSE, NULL, NULL),
+('hash17', 'user17', 'user17@mail.com', 'First17', 'Last17', 'Female', '0900000017', 'City17', '1995-04-14', TRUE, NULL, NULL),
+('hash18', 'user18', 'user18@mail.com', 'First18', 'Last18', 'Male', '0900000018', 'City18', '1997-07-20', TRUE, NULL, NULL),
+('hash19', 'user19', 'user19@mail.com', 'First19', 'Last19', 'Female', '0900000019', 'City19', '1991-05-22', TRUE, NULL, NULL),
+('hash20', 'user20', 'user20@mail.com', 'First20', 'Last20', 'Male', '0900000020', 'City20', '1997-05-17', TRUE, NULL, NULL);
 
 -- ROOM TYPES
 INSERT INTO Room_Types (name, description) VALUES
@@ -257,13 +254,15 @@ INSERT INTO Services (service_code, name, price, availability, description) VALU
 ('SV003', 'Airport Pickup', 200000, TRUE, 'Pickup from airport'),
 ('SV004', 'Spa', 300000, TRUE, 'Relaxing massage and spa'),
 ('SV005', 'Dinner', 250000, TRUE, 'Dinner buffet at restaurant'),
-('SV006', 'Mini Bar', 150000, TRUE, 'In-room mini bar');
+('SV006', 'Mini Bar', 150000, TRUE, 'In-room mini bar'),
+('SV007', 'Extra Bed', 200000, TRUE, 'Additional bed for extra guest'),
+('SV008', 'Tour Guide', 500000, TRUE, 'Daily city tour guide');
 
 -- PROMOTIONS
-INSERT INTO Promotions (promotion_code, name, discount_value, start_date, end_date, scope, description) VALUES
-('PROMO10', 'New Year Discount', 10.00, '2025-01-01', '2025-02-01', 'invoice', '10% off total invoice'),
-('PROMO20', 'Room Discount', 20.00, '2025-03-01', '2025-04-01', 'room', '20% off room price'),
-('PROMO30', 'Summer Offer', 15.00, '2025-06-01', '2025-07-01', 'service', '15% off all services');
+INSERT INTO Promotions (promotion_code, name, discount_value, start_date, end_date, scope, description, usage_limit, used_count) VALUES
+('PROMO10', 'New Year Discount', 10.00, '2025-01-01', '2025-02-01', 'invoice', '10% off total invoice', 50, 5),
+('PROMO20', 'Room Discount', 20.00, '2025-03-01', '2025-04-01', 'room', '20% off room price', 20, 10),
+('PROMO30', 'Summer Offer', 15.00, '2025-06-01', '2025-07-01', 'service', '15% off all services', 100, 0);
 
 -- BOOKINGS
 INSERT INTO Bookings (user_id, check_in, check_out, status, total_guests) VALUES
@@ -315,27 +314,27 @@ INSERT INTO Used_Services (booking_id, service_id, quantity, service_price, serv
 (8, 5, 1, 212180, '2025-11-21'), (15, 6, 1, 265094, '2025-11-07');
 
 -- INVOICES
-INSERT INTO Invoices (booking_id, staff_id, total_room_cost, total_service_cost, discount_amount, final_amount, vat_amount, promotion_id) VALUES
-(1, 2, 500000, 200000, 0, 700000, 70000.0, 2),
-(2, 3, 500000, 300000, 0, 800000, 80000.0, 3),
-(3, 1, 2000000, 0, 50000, 1950000, 195000.0, 1),
-(4, 3, 1000000, 100000, 100000, 1000000, 100000.0, 3),
-(5, 2, 500000, 200000, 0, 700000, 70000.0, 2),
-(6, 2, 1500000, 300000, 50000, 1750000, 175000.0, 1),
-(7, 1, 2000000, 100000, 50000, 2050000, 205000.0, 2),
-(8, 3, 2500000, 200000, 0, 2700000, 270000.0, 3),
-(9, 2, 2500000, 300000, 100000, 2700000, 270000.0, 3),
-(10, 2, 2500000, 200000, 50000, 2650000, 265000.0, 1),
-(11, 3, 2000000, 300000, 50000, 2250000, 225000.0, 2),
-(12, 3, 1500000, 100000, 100000, 1500000, 150000.0, 1),
-(13, 2, 500000, 100000, 50000, 550000, 55000.0, 3),
-(14, 3, 500000, 300000, 100000, 700000, 70000.0, 3),
-(15, 3, 2000000, 0, 0, 2000000, 200000.0, 3),
-(16, 1, 2500000, 300000, 50000, 2750000, 275000.0, 2),
-(17, 2, 500000, 100000, 0, 600000, 60000.0, 2),
-(18, 2, 1000000, 300000, 100000, 1200000, 120000.0, 2),
-(19, 1, 2000000, 300000, 50000, 2250000, 225000.0, 3),
-(20, 3, 2000000, 300000, 100000, 2200000, 220000.0, 1);
+INSERT INTO Invoices (booking_id, staff_id, total_room_cost, total_service_cost, discount_amount, final_amount, vat_amount, promotion_id, payment_status) VALUES
+(1, 2, 500000, 200000, 0, 700000, 70000.0, 2, 'paid'),
+(2, 3, 500000, 300000, 0, 800000, 80000.0, 3, 'paid'),
+(3, 1, 2000000, 0, 50000, 1950000, 195000.0, 1, 'paid'),
+(4, 3, 1000000, 100000, 100000, 1000000, 100000.0, 3, 'paid'),
+(5, 2, 500000, 200000, 0, 700000, 70000.0, 2, 'paid'),
+(6, 2, 1500000, 300000, 50000, 1750000, 175000.0, 1, 'paid'),
+(7, 1, 2000000, 100000, 50000, 2050000, 205000.0, 2, 'paid'),
+(8, 3, 2500000, 200000, 0, 2700000, 270000.0, 3, 'paid'),
+(9, 2, 2500000, 300000, 100000, 2700000, 270000.0, 3, 'paid'),
+(10, 2, 2500000, 200000, 50000, 2650000, 265000.0, 1, 'paid'),
+(11, 3, 2000000, 300000, 50000, 2250000, 225000.0, 2, 'paid'),
+(12, 3, 1500000, 100000, 100000, 1500000, 150000.0, 1, 'paid'),
+(13, 2, 500000, 100000, 50000, 550000, 55000.0, 3, 'paid'),
+(14, 3, 500000, 300000, 100000, 700000, 70000.0, 3, 'paid'),
+(15, 3, 2000000, 0, 0, 2000000, 200000.0, 3, 'paid'),
+(16, 1, 2500000, 300000, 50000, 2750000, 275000.0, 2, 'paid'),
+(17, 2, 500000, 100000, 0, 600000, 60000.0, 2, 'paid'),
+(18, 2, 1000000, 300000, 100000, 1200000, 120000.0, 2, 'paid'),
+(19, 1, 2000000, 300000, 50000, 2250000, 225000.0, 3, 'paid'),
+(20, 3, 2000000, 300000, 100000, 2200000, 220000.0, 1, 'paid');
 
 -- REVIEWS
 INSERT INTO Reviews (booking_id, user_id, room_id, rating, comment) VALUES
@@ -350,37 +349,7 @@ INSERT INTO Reviews (booking_id, user_id, room_id, rating, comment) VALUES
 (17, 4, 7, 5, 'Great stay 17'), (18, 1, 12, 3, 'Great stay 18'),
 (19, 20, 14, 3, 'Great stay 19'), (20, 14, 11, 4, 'Great stay 20');
 
-
-
-
--- ============================================
--- DATA INSERTION (ADDITIONAL SAMPLE DATA)
--- ============================================
-
--- Insert Sample Reports
+-- REPORTS
 INSERT INTO Reports (title, report_type, start_date, end_date, total_revenue, generated_content, created_by) VALUES
 ('Monthly Revenue Report - October 2025', 'revenue', '2025-10-01', '2025-10-31', 150000000, '{"room_revenue": 120000000, "service_revenue": 30000000}', 1),
 ('Service Usage Report - Q3 2025', 'service_usage', '2025-07-01', '2025-09-30', 45000000, '{"top_service": "Spa", "least_service": "Laundry"}', 2);
-
--- Update some Users with dummy OTP data for testing (optional)
-UPDATE Users SET otp_code = '123456', otp_expires_at = NOW() + INTERVAL '10 minutes' WHERE username = 'user1';
-UPDATE Users SET otp_code = '654321', otp_expires_at = NOW() - INTERVAL '10 minutes' WHERE username = 'user2';
-
--- Update Promotions usage
-UPDATE Promotions SET usage_limit = 50, used_count = 5 WHERE promotion_code = 'PROMO10';
-UPDATE Promotions SET usage_limit = 20, used_count = 10 WHERE promotion_code = 'PROMO20';
-
--- Add more Services if needed (Expanding Services list)
-INSERT INTO Services (service_code, name, price, availability, description) VALUES
-('SV007', 'Extra Bed', 200000, TRUE, 'Additional bed for extra guest'),
-('SV008', 'Tour Guide', 500000, TRUE, 'Daily city tour guide');
-
--- Add more sample Invoices to ensure we have data for Reports logic later
-INSERT INTO Invoices (booking_id, staff_id, total_room_cost, total_service_cost, discount_amount, final_amount, vat_amount, promotion_id, payment_status) VALUES
-(11, 2, 2000000, 300000, 0, 2530000, 230000, NULL, 'paid'),
-(12, 1, 1500000, 100000, 150000, 1595000, 145000, 1, 'paid');
--- Bổ sung cột is_active cho Room_Types để hỗ trợ xóa mềm
-ALTER TABLE Room_Types ADD COLUMN IF NOT EXISTS is_active BOOLEAN DEFAULT TRUE;
-
--- (Nếu chưa có) Đảm bảo các bảng khác cũng có
-ALTER TABLE Promotions ADD COLUMN IF NOT EXISTS is_active BOOLEAN DEFAULT TRUE;

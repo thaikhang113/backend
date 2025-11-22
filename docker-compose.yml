@@ -10,11 +10,11 @@ services:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: root
       POSTGRES_DB: hotel_management
-    ports:
-      - "5432:5432" # Mở port ra ngoài nếu muốn connect từ máy tính cá nhân
+    # ports:
+    #   - "5432:5432"  <-- QUAN TRỌNG: Đóng port này lại để chặn Hack/Virus
     volumes:
-      - pgdata:/var/lib/postgresql/data # Lưu dữ liệu ra ngoài để không mất khi tắt container
-      - ./hotel_management.sql:/docker-entrypoint-initdb.d/init.sql # Tự động import file SQL khi chạy lần đầu
+      - pgdata:/var/lib/postgresql/data
+      - ./hotel_management.sql:/docker-entrypoint-initdb.d/init.sql
 
   # Dịch vụ 2: Node.js Backend
   app:
@@ -24,7 +24,7 @@ services:
     ports:
       - "3000:3000"
     environment:
-      - DB_HOST=db          # Quan trọng: Trong Docker, host là tên service (db), không phải localhost
+      - DB_HOST=db
       - DB_USER=postgres
       - DB_PASSWORD=root
       - DB_NAME=hotel_management
@@ -32,7 +32,7 @@ services:
       - PORT=3000
       - API_SECRET_KEY=my_secure_hotel_secret
     depends_on:
-      - db # Chờ database chạy xong mới chạy app
+      - db
 
 volumes:
   pgdata:
