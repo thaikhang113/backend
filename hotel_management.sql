@@ -1,13 +1,15 @@
 -- ============================================
--- DATABASE: Hotel Management System
+-- DATABASE: Hotel Management System (FULL FIXED)
 -- ============================================
 
--- Clean up existing tables if any
-DROP TABLE IF EXISTS Room_Status_History, Reviews, Invoices, Used_Services, Services, Booked_Rooms, Bookings, Rooms, Room_Types, Promotions, Users, Reports CASCADE;
+-- 1. XÓA BẢNG CŨ (Để tạo lại từ đầu)
+DROP TABLE IF EXISTS Room_Status_History, Reviews, Invoices, Used_Services, Services, Booked_Rooms, Bookings, Rooms, Room_Types, Promotions, Reports, Users CASCADE;
 
 -- ==========================
--- TABLE: Users
+-- 2. TẠO BẢNG (SCHEMA)
 -- ==========================
+
+-- TABLE: Users
 CREATE TABLE Users (
     user_id SERIAL PRIMARY KEY,
     password_hash VARCHAR(255) NOT NULL,
@@ -22,25 +24,21 @@ CREATE TABLE Users (
     date_of_birth DATE,
     is_staff BOOLEAN DEFAULT FALSE,
     is_active BOOLEAN DEFAULT TRUE,
-    -- Added columns directly here
+    -- Các cột bổ sung cho tính năng mới
     otp_code VARCHAR(10),
     otp_expires_at TIMESTAMP,
     last_login TIMESTAMP
 );
 
--- ==========================
 -- TABLE: Room_Types
--- ==========================
 CREATE TABLE Room_Types (
     room_type_id SERIAL PRIMARY KEY,
     name VARCHAR(100) UNIQUE NOT NULL,
     description TEXT,
-    is_active BOOLEAN DEFAULT TRUE
+    is_active BOOLEAN DEFAULT TRUE -- Hỗ trợ xóa mềm
 );
 
--- ==========================
 -- TABLE: Rooms
--- ==========================
 CREATE TABLE Rooms (
     room_id SERIAL PRIMARY KEY,
     room_number VARCHAR(10) UNIQUE NOT NULL,
@@ -54,9 +52,7 @@ CREATE TABLE Rooms (
     is_active BOOLEAN DEFAULT TRUE
 );
 
--- ==========================
 -- TABLE: Services
--- ==========================
 CREATE TABLE Services (
     service_id SERIAL PRIMARY KEY,
     service_code VARCHAR(20) UNIQUE NOT NULL,
@@ -66,9 +62,7 @@ CREATE TABLE Services (
     description TEXT
 );
 
--- ==========================
 -- TABLE: Promotions
--- ==========================
 CREATE TABLE Promotions (
     promotion_id SERIAL PRIMARY KEY,
     promotion_code VARCHAR(50) UNIQUE NOT NULL,
@@ -79,14 +73,24 @@ CREATE TABLE Promotions (
     is_active BOOLEAN DEFAULT TRUE,
     scope VARCHAR(20) DEFAULT 'invoice',
     description TEXT,
-    -- Added columns directly here
     usage_limit INTEGER DEFAULT 100,
     used_count INTEGER DEFAULT 0
 );
 
--- ==========================
+-- TABLE: Reports (Tính năng báo cáo)
+CREATE TABLE Reports (
+    report_id SERIAL PRIMARY KEY,
+    title VARCHAR(255) NOT NULL,
+    report_type VARCHAR(50) NOT NULL, -- 'daily', 'monthly', 'revenue'
+    start_date DATE,
+    end_date DATE,
+    total_revenue DECIMAL(15, 2) DEFAULT 0,
+    generated_content TEXT, -- JSON hoặc text
+    created_by INTEGER REFERENCES Users(user_id),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
 -- TABLE: Bookings
--- ==========================
 CREATE TABLE Bookings (
     booking_id SERIAL PRIMARY KEY,
     user_id INTEGER REFERENCES Users(user_id),
@@ -97,9 +101,7 @@ CREATE TABLE Bookings (
     total_guests INTEGER
 );
 
--- ==========================
 -- TABLE: Booked_Rooms
--- ==========================
 CREATE TABLE Booked_Rooms (
     booked_room_id SERIAL PRIMARY KEY,
     booking_id INTEGER REFERENCES Bookings(booking_id),
@@ -107,9 +109,7 @@ CREATE TABLE Booked_Rooms (
     price_at_booking DECIMAL(10,2)
 );
 
--- ==========================
 -- TABLE: Used_Services
--- ==========================
 CREATE TABLE Used_Services (
     used_service_id SERIAL PRIMARY KEY,
     booking_id INTEGER REFERENCES Bookings(booking_id),
@@ -119,9 +119,7 @@ CREATE TABLE Used_Services (
     service_date TIMESTAMP
 );
 
--- ==========================
 -- TABLE: Invoices
--- ==========================
 CREATE TABLE Invoices (
     invoice_id SERIAL PRIMARY KEY,
     booking_id INTEGER REFERENCES Bookings(booking_id),
@@ -139,9 +137,7 @@ CREATE TABLE Invoices (
     tax_amount DECIMAL(10,2)
 );
 
--- ==========================
 -- TABLE: Reviews
--- ==========================
 CREATE TABLE Reviews (
     review_id SERIAL PRIMARY KEY,
     booking_id INTEGER REFERENCES Bookings(booking_id),
@@ -152,9 +148,7 @@ CREATE TABLE Reviews (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- ==========================
 -- TABLE: Room_Status_History
--- ==========================
 CREATE TABLE Room_Status_History (
     history_id SERIAL PRIMARY KEY,
     room_id INTEGER REFERENCES Rooms(room_id),
@@ -164,23 +158,8 @@ CREATE TABLE Room_Status_History (
     changed_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- ==========================
--- TABLE: Reports (New Feature)
--- ==========================
-CREATE TABLE Reports (
-    report_id SERIAL PRIMARY KEY,
-    title VARCHAR(255) NOT NULL,
-    report_type VARCHAR(50) NOT NULL, 
-    start_date DATE,
-    end_date DATE,
-    total_revenue DECIMAL(15, 2) DEFAULT 0,
-    generated_content TEXT,
-    created_by INTEGER REFERENCES Users(user_id),
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
-
 -- ============================================
--- DATA INSERTION
+-- 3. THÊM DỮ LIỆU MẪU (DATA INSERTION)
 -- ============================================
 
 -- USERS
@@ -205,6 +184,11 @@ INSERT INTO Users (password_hash, username, email, first_name, last_name, gender
 ('hash18', 'user18', 'user18@mail.com', 'First18', 'Last18', 'Male', '0900000018', 'City18', '1997-07-20', TRUE, NULL, NULL),
 ('hash19', 'user19', 'user19@mail.com', 'First19', 'Last19', 'Female', '0900000019', 'City19', '1991-05-22', TRUE, NULL, NULL),
 ('hash20', 'user20', 'user20@mail.com', 'First20', 'Last20', 'Male', '0900000020', 'City20', '1997-05-17', TRUE, NULL, NULL);
+
+-- Thêm User Admin hệ thống (để test Postman)
+INSERT INTO Users (password_hash, username, email, first_name, last_name, is_staff) 
+VALUES ('$2a$10$X7.x8/z.z9/z.z9/z.z9/z.z9/z.z9/z.z9/z.z9/z.z9', 'admin_system', 'admin@hotel.com', 'Admin', 'System', TRUE)
+ON CONFLICT (username) DO NOTHING;
 
 -- ROOM TYPES
 INSERT INTO Room_Types (name, description) VALUES
