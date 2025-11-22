@@ -4,7 +4,33 @@
 
 -- Clean up
 DROP TABLE IF EXISTS Room_Status_History, Reviews, Invoices, Used_Services, Services, Booked_Rooms, Bookings, Rooms, Room_Types, Promotions, Users;
+-- ============================================
+-- STEP 1: SCHEMA UPDATE
+-- ============================================
 
+-- 1. Update Users Table (For OTP & Auth)
+ALTER TABLE Users 
+ADD COLUMN IF NOT EXISTS otp_code VARCHAR(10),
+ADD COLUMN IF NOT EXISTS otp_expires_at TIMESTAMP,
+ADD COLUMN IF NOT EXISTS last_login TIMESTAMP;
+
+-- 2. Update Promotions Table (For Usage Limits)
+ALTER TABLE Promotions 
+ADD COLUMN IF NOT EXISTS usage_limit INTEGER DEFAULT 100,
+ADD COLUMN IF NOT EXISTS used_count INTEGER DEFAULT 0;
+
+-- 3. Create Reports Table (New Feature)
+CREATE TABLE IF NOT EXISTS Reports (
+    report_id SERIAL PRIMARY KEY,
+    title VARCHAR(255) NOT NULL,
+    report_type VARCHAR(50) NOT NULL, -- 'daily', 'monthly', 'revenue', 'service_usage'
+    start_date DATE,
+    end_date DATE,
+    total_revenue DECIMAL(15, 2) DEFAULT 0,
+    generated_content TEXT, -- JSON or Summary text
+    created_by INTEGER REFERENCES Users(user_id),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
 -- ==========================
 -- TABLE: Users
 -- ==========================
@@ -323,3 +349,38 @@ INSERT INTO Reviews (booking_id, user_id, room_id, rating, comment) VALUES
 (15, 17, 27, 4, 'Great stay 15'), (16, 10, 20, 4, 'Great stay 16'),
 (17, 4, 7, 5, 'Great stay 17'), (18, 1, 12, 3, 'Great stay 18'),
 (19, 20, 14, 3, 'Great stay 19'), (20, 14, 11, 4, 'Great stay 20');
+
+
+
+
+-- ============================================
+-- DATA INSERTION (ADDITIONAL SAMPLE DATA)
+-- ============================================
+
+-- Insert Sample Reports
+INSERT INTO Reports (title, report_type, start_date, end_date, total_revenue, generated_content, created_by) VALUES
+('Monthly Revenue Report - October 2025', 'revenue', '2025-10-01', '2025-10-31', 150000000, '{"room_revenue": 120000000, "service_revenue": 30000000}', 1),
+('Service Usage Report - Q3 2025', 'service_usage', '2025-07-01', '2025-09-30', 45000000, '{"top_service": "Spa", "least_service": "Laundry"}', 2);
+
+-- Update some Users with dummy OTP data for testing (optional)
+UPDATE Users SET otp_code = '123456', otp_expires_at = NOW() + INTERVAL '10 minutes' WHERE username = 'user1';
+UPDATE Users SET otp_code = '654321', otp_expires_at = NOW() - INTERVAL '10 minutes' WHERE username = 'user2';
+
+-- Update Promotions usage
+UPDATE Promotions SET usage_limit = 50, used_count = 5 WHERE promotion_code = 'PROMO10';
+UPDATE Promotions SET usage_limit = 20, used_count = 10 WHERE promotion_code = 'PROMO20';
+
+-- Add more Services if needed (Expanding Services list)
+INSERT INTO Services (service_code, name, price, availability, description) VALUES
+('SV007', 'Extra Bed', 200000, TRUE, 'Additional bed for extra guest'),
+('SV008', 'Tour Guide', 500000, TRUE, 'Daily city tour guide');
+
+-- Add more sample Invoices to ensure we have data for Reports logic later
+INSERT INTO Invoices (booking_id, staff_id, total_room_cost, total_service_cost, discount_amount, final_amount, vat_amount, promotion_id, payment_status) VALUES
+(11, 2, 2000000, 300000, 0, 2530000, 230000, NULL, 'paid'),
+(12, 1, 1500000, 100000, 150000, 1595000, 145000, 1, 'paid');
+-- Bổ sung cột is_active cho Room_Types để hỗ trợ xóa mềm
+ALTER TABLE Room_Types ADD COLUMN IF NOT EXISTS is_active BOOLEAN DEFAULT TRUE;
+
+-- (Nếu chưa có) Đảm bảo các bảng khác cũng có
+ALTER TABLE Promotions ADD COLUMN IF NOT EXISTS is_active BOOLEAN DEFAULT TRUE;

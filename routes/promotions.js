@@ -1,12 +1,13 @@
 const express = require('express');
 const router = express.Router();
 const promotionController = require('../controllers/promotionController');
-const { authMiddleware, adminGuard } = require('../middleware/auth');
+const { verifyToken, isStaff } = require('../middleware/auth'); // Nếu có middleware
 
+// Định nghĩa các route con
 router.get('/', promotionController.getAllPromotions);
 router.get('/:id', promotionController.getPromotionById);
-router.post('/', authMiddleware, adminGuard, promotionController.createPromotion);
-router.put('/:id', authMiddleware, adminGuard, promotionController.updatePromotion);
-router.delete('/:id', authMiddleware, adminGuard, promotionController.deletePromotion);
+router.post('/', verifyToken, isStaff, promotionController.createPromotion);
+router.put('/:id', verifyToken, isStaff, promotionController.updatePromotion);
+router.delete('/:id', verifyToken, isStaff, promotionController.deletePromotion);
 
 module.exports = router;

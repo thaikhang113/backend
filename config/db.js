@@ -4,25 +4,17 @@ require('dotenv').config();
 const pool = new Pool({
     user: process.env.DB_USER,
     host: process.env.DB_HOST,
-    database: process.env.DB_NAME,
+    database: process.env.DB_DATABASE,
     password: process.env.DB_PASSWORD,
     port: process.env.DB_PORT,
 });
 
-pool.on('error', (err, client) => {
+pool.on('error', (err) => {
     console.error('Unexpected error on idle client', err);
     process.exit(-1);
 });
 
-pool.connect((err, client, release) => {
-    if (err) {
-        return console.error('Error acquiring client', err.stack);
-    }
-    console.log('Database connected successfully to ' + process.env.DB_NAME);
-    release();
-});
-
 module.exports = {
     query: (text, params) => pool.query(text, params),
-    pool: pool,
+    getClient: () => pool.connect(),
 };

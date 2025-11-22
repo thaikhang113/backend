@@ -1,36 +1,35 @@
-const db = require('../config/db');
+const ReportService = require('../services/reportService');
+const Report = require('../models/report');
 
-const getRevenueReport = async (req, res) => {
-    try {
-        const query = `
-            SELECT 
-                EXTRACT(MONTH FROM issue_date) as month,
-                EXTRACT(YEAR FROM issue_date) as year,
-                SUM(final_amount) as revenue,
-                COUNT(invoice_id) as total_invoices
-            FROM Invoices
-            GROUP BY year, month
-            ORDER BY year DESC, month DESC
-        `;
-        const result = await db.query(query);
-        res.json(result.rows);
-    } catch (err) {
-        res.status(500).json({ error: err.message });
+const ReportController = {
+    getDashboard: async (req, res) => {
+        try {
+            const stats = await ReportService.getDashboardData();
+            res.json(stats);
+        } catch (error) {
+            res.status(500).json({ message: error.message });
+        }
+    },
+
+    generateRevenueReport: async (req, res) => {
+        try {
+            const { startDate, endDate, type } = req.body;
+            const userId = req.user ? req.user.user_id : 1;
+            const report = await ReportService.generateRevenueReport(userId, startDate, endDate, type);
+            res.status(201).json(report);
+        } catch (error) {
+            res.status(500).json({ message: error.message });
+        }
+    },
+
+    getAllReports: async (req, res) => {
+        try {
+            const reports = await Report.getAll();
+            res.json(reports);
+        } catch (error) {
+            res.status(500).json({ message: error.message });
+        }
     }
 };
 
-const getBookingStats = async (req, res) => {
-    try {
-        const query = `
-            SELECT status, COUNT(*) as count 
-            FROM Bookings 
-            GROUP BY status
-        `;
-        const result = await db.query(query);
-        res.json(result.rows);
-    } catch (err) {
-        res.status(500).json({ error: err.message });
-    }
-};
-
-module.exports = { getRevenueReport, getBookingStats };
+module.exports = ReportController;
