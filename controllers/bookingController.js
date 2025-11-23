@@ -4,7 +4,7 @@ const BookingService = require('../services/bookingService');
 const BookingController = {
     createBooking: async (req, res) => {
         try {
-            // req.user lấy từ middleware verifyToken
+            // req.user được giả lập từ server.js
             const userId = req.user ? req.user.user_id : req.body.user_id; 
             const booking = await BookingService.createBooking(userId, req.body);
             res.status(201).json({ message: 'Đặt phòng thành công', booking });
@@ -16,19 +16,19 @@ const BookingController = {
     getBookingDetails: async (req, res) => {
         try {
             const bookingId = req.params.id;
-            // Nếu không có ID (trường hợp get all), lấy danh sách booking của user
+            // Nếu không có ID (trường hợp get all)
             if (!bookingId || bookingId === 'undefined') {
                  const userId = req.user.user_id;
+                 // Mặc định cho phép xem hết nếu là staff (user giả lập là staff)
                  const query = req.user.is_staff 
-                    ? `SELECT b.*, u.username FROM Bookings b JOIN Users u ON b.user_id = u.user_id ORDER BY b.booking_date DESC` // Admin xem hết
-                    : `SELECT * FROM Bookings WHERE user_id = $1 ORDER BY booking_date DESC`; // Khách xem của mình
+                    ? `SELECT b.*, u.username FROM Bookings b JOIN Users u ON b.user_id = u.user_id ORDER BY b.booking_date DESC` 
+                    : `SELECT * FROM Bookings WHERE user_id = $1 ORDER BY booking_date DESC`;
                  
                  const params = req.user.is_staff ? [] : [userId];
                  const result = await db.query(query, params);
                  return res.json(result.rows);
             }
 
-            // Lấy chi tiết 1 booking
             const booking = await db.query(`
                 SELECT b.*, u.username, u.email 
                 FROM Bookings b
@@ -79,7 +79,6 @@ const BookingController = {
         }
     },
 
-    // --- MỚI: UPDATE BOOKING ---
     updateBooking: async (req, res) => {
         const { id } = req.params;
         const { check_in, check_out, status, total_guests } = req.body;
@@ -104,20 +103,16 @@ const BookingController = {
         }
     },
 
-    // --- MỚI: DELETE BOOKING ---
     deleteBooking: async (req, res) => {
         const { id } = req.params;
         try {
-            // Xóa các bảng phụ thuộc trước (nếu xóa cứng)
             await db.query('DELETE FROM Booked_Rooms WHERE booking_id = $1', [id]);
             await db.query('DELETE FROM Used_Services WHERE booking_id = $1', [id]);
-            // Xóa booking
             const result = await db.query('DELETE FROM Bookings WHERE booking_id = $1 RETURNING *', [id]);
             
             if (result.rows.length === 0) return res.status(404).json({ message: 'Booking not found' });
             res.json({ message: 'Booking deleted successfully' });
         } catch (error) {
-            // Nếu đã có hóa đơn, không xóa được -> Chuyển trạng thái
             if (error.code === '23503') {
                 await db.query("UPDATE Bookings SET status = 'cancelled' WHERE booking_id = $1", [id]);
                 return res.json({ message: 'Booking has invoice, status changed to Cancelled instead of delete.' });

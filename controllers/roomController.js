@@ -1,10 +1,9 @@
 const db = require('../config/db');
-const BookingService = require('../services/bookingService'); // Import Service nếu cần dùng cho search
+const BookingService = require('../services/bookingService');
 
 const RoomController = {
     getAllRooms: async (req, res) => {
         try {
-            // Chỉ lấy phòng đang hoạt động (chưa bị xóa mềm)
             const result = await db.query(`
                 SELECT r.*, rt.name as room_type_name 
                 FROM Rooms r 
@@ -36,8 +35,6 @@ const RoomController = {
                 return res.status(400).json({ message: 'Check-in and Check-out dates are required.' });
             }
 
-            // Logic tìm phòng trống (Sử dụng hàm từ model hoặc service)
-            // Ở đây viết query trực tiếp cho nhanh và chính xác
             let query = `
                 SELECT r.*, rt.name as room_type_name, r.price_per_night as base_price
                 FROM Rooms r
@@ -73,7 +70,6 @@ const RoomController = {
     createRoom: async (req, res) => {
         const { room_number, room_type_id, floor, price_per_night, max_guests, bed_count, description } = req.body;
         
-        // Validate các trường bắt buộc
         if (!room_number || !room_type_id || !price_per_night) {
              return res.status(400).json({ message: 'Room number, type ID, and price are required.' });
         }
@@ -93,18 +89,15 @@ const RoomController = {
         }
     },
 
-    // --- FIX QUAN TRỌNG: DYNAMIC UPDATE ---
     updateRoom: async (req, res) => {
         const { id } = req.params;
         const body = req.body;
 
         try {
-            // 1. Lấy dữ liệu cũ
             const existingResult = await db.query('SELECT * FROM Rooms WHERE room_id = $1', [id]);
             if (existingResult.rows.length === 0) return res.status(404).json({ message: 'Room not found' });
             const existing = existingResult.rows[0];
 
-            // 2. Gán giá trị (Giữ nguyên cũ nếu không gửi mới)
             const room_number = body.room_number !== undefined ? body.room_number : existing.room_number;
             const room_type_id = body.room_type_id !== undefined ? body.room_type_id : existing.room_type_id;
             const floor = body.floor !== undefined ? body.floor : existing.floor;
@@ -115,12 +108,10 @@ const RoomController = {
             const status = body.status !== undefined ? body.status : existing.status;
             const is_active = body.is_active !== undefined ? body.is_active : existing.is_active;
 
-            // 3. Kiểm tra Not Null
             if (!room_number || !room_type_id || !price_per_night) {
                  return res.status(400).json({ error: 'Room number, type ID, and price cannot be null.' });
             }
 
-            // 4. Update
             const result = await db.query(
                 `UPDATE Rooms SET 
                  room_number = $1, room_type_id = $2, floor = $3, price_per_night = $4, 
@@ -147,17 +138,14 @@ const RoomController = {
         }
     },
 
-    // --- FIX QUAN TRỌNG: SOFT DELETE ROOMS ---
     deleteRoom: async (req, res) => {
         const { id } = req.params;
         try {
-            // Thay vì DELETE FROM..., ta UPDATE is_active = FALSE
             const result = await db.query('UPDATE Rooms SET is_active = FALSE WHERE room_id = $1 RETURNING *', [id]);
             
             if (result.rows.length === 0) return res.status(404).json({ message: 'Room not found' });
             res.json({ message: 'Room deactivated successfully (Soft Delete)' });
         } catch (err) {
-            // Phòng trường hợp vẫn lỗi (dù hiếm khi dùng soft delete)
             if (err.code === '23503') {
                  return res.status(400).json({ error: 'Cannot delete room: Referenced by active bookings.' });
             }

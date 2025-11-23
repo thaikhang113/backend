@@ -1,5 +1,4 @@
 const db = require('../config/db');
-const crypto = require('crypto');
 
 const getAllCustomers = async (req, res) => {
     try {
@@ -16,10 +15,7 @@ const getCustomerById = async (req, res) => {
         const result = await db.query('SELECT * FROM Users WHERE user_id = $1 AND is_staff = FALSE', [id]);
         if (result.rows.length === 0) return res.status(404).json({ message: 'Customer not found' });
         
-        // Phân quyền: Chỉ admin hoặc chính customer đó mới xem được chi tiết
-        if (req.user && !req.user.is_staff && req.user.user_id !== parseInt(id)) {
-            return res.status(403).json({ message: 'Forbidden' });
-        }
+        // Đã xóa check quyền: Ai cũng có thể xem chi tiết
         res.json(result.rows[0]);
     } catch (err) {
         res.status(500).json({ error: err.message });
@@ -33,7 +29,9 @@ const createCustomer = async (req, res) => {
             return res.status(400).json({ message: 'Username, password, and email are required.' });
         }
 
-        const passwordHash = crypto.createHash('sha256').update(password).digest('hex');
+        // Không hash password
+        const passwordHash = password;
+
         const query = `
             INSERT INTO Users (username, password_hash, email, first_name, last_name, phone_number, address, date_of_birth, gender, is_staff, is_active)
             VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, FALSE, TRUE) RETURNING user_id, username;
@@ -46,18 +44,13 @@ const createCustomer = async (req, res) => {
     }
 };
 
-// --- FIX QUAN TRỌNG: DYNAMIC UPDATE LOGIC ---
 const updateCustomer = async (req, res) => {
     const { id } = req.params;
     const body = req.body;
     
-    // Kiểm tra quyền (như code cũ của bạn)
-    if (req.user && !req.user.is_staff && req.user.user_id !== parseInt(id)) {
-        return res.status(403).json({ message: 'Forbidden' });
-    }
+    // Đã xóa check quyền: Ai cũng có thể sửa
 
     try {
-        // 1. Lấy dữ liệu cũ để giữ lại các trường NOT NULL nếu không được cung cấp
         const existingCustomerResult = await db.query(
             'SELECT email, first_name, last_name, phone_number, address, date_of_birth, is_active FROM Users WHERE user_id = $1 AND is_staff = FALSE', [id]
         );
@@ -65,7 +58,6 @@ const updateCustomer = async (req, res) => {
         
         const existingCustomer = existingCustomerResult.rows[0];
 
-        // 2. Gán giá trị: dùng giá trị mới nếu có, ngược lại dùng giá trị cũ
         const email = body.email !== undefined ? body.email : existingCustomer.email;
         const first_name = body.first_name !== undefined ? body.first_name : existingCustomer.first_name;
         const last_name = body.last_name !== undefined ? body.last_name : existingCustomer.last_name;
@@ -74,12 +66,10 @@ const updateCustomer = async (req, res) => {
         const date_of_birth = body.date_of_birth !== undefined ? body.date_of_birth : existingCustomer.date_of_birth;
         const is_active = body.is_active !== undefined ? body.is_active : existingCustomer.is_active;
 
-        // 3. Kiểm tra Not Null bắt buộc (để đảm bảo không bị lỗi 23502)
         if (email === null || email === undefined) {
              return res.status(400).json({ error: 'Email cannot be null or empty.' });
         }
 
-        // 4. Thực hiện UPDATE
         const result = await db.query(
             'UPDATE Users SET email = $1, first_name = $2, last_name = $3, phone_number = $4, address = $5, date_of_birth = $6, is_active = $7 WHERE user_id = $8 AND is_staff = FALSE RETURNING *',
             [email, first_name, last_name, phone_number, address, date_of_birth, is_active, id]
@@ -95,7 +85,6 @@ const updateCustomer = async (req, res) => {
 const deleteCustomer = async (req, res) => {
     const { id } = req.params;
     try {
-        // Thay DELETE bằng SOFT DELETE (UPDATE is_active = FALSE)
         const result = await db.query('UPDATE Users SET is_active = FALSE WHERE user_id = $1 AND is_staff = FALSE RETURNING user_id', [id]);
         
         if (result.rows.length === 0) return res.status(404).json({ message: 'Customer not found' });

@@ -37,28 +37,23 @@ const RoomTypeController = {
         }
     },
 
-    // --- FIX QUAN TRỌNG: DYNAMIC UPDATE LOGIC ---
     updateRoomType: async (req, res) => {
         const { id } = req.params;
         const body = req.body;
 
         try {
-            // 1. Lấy dữ liệu cũ
             const existingResult = await db.query('SELECT name, description, is_active FROM Room_Types WHERE room_type_id = $1', [id]);
             if (existingResult.rows.length === 0) return res.status(404).json({ message: 'Room Type not found' });
             const existing = existingResult.rows[0];
 
-            // 2. Gán giá trị: dùng giá trị mới nếu có, ngược lại dùng giá trị cũ
             const name = body.name !== undefined ? body.name : existing.name;
             const description = body.description !== undefined ? body.description : existing.description;
             const is_active = body.is_active !== undefined ? body.is_active : existing.is_active;
 
-            // 3. Kiểm tra Not Null bắt buộc
             if (!name) {
                  return res.status(400).json({ error: 'Room type name cannot be null.' });
             }
 
-            // 4. Thực hiện UPDATE
             const result = await db.query(
                 'UPDATE Room_Types SET name = $1, description = $2, is_active = $3 WHERE room_type_id = $4 RETURNING *',
                 [name, description, is_active, id]

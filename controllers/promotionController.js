@@ -45,7 +45,6 @@ const PromotionController = {
         }
     },
 
-    // --- FIX QUAN TRỌNG: DYNAMIC UPDATE LOGIC ---
     updatePromotion: async (req, res) => {
         const { id } = req.params;
         const body = req.body;
@@ -55,7 +54,6 @@ const PromotionController = {
             if (existingResult.rows.length === 0) return res.status(404).json({ message: 'Promotion not found' });
             const existing = existingResult.rows[0];
 
-            // Promotion code không nên thay đổi, chỉ các trường khác
             const name = body.name !== undefined ? body.name : existing.name;
             const discount_value = body.discount_value !== undefined ? body.discount_value : existing.discount_value;
             const start_date = body.start_date !== undefined ? body.start_date : existing.start_date;
@@ -65,7 +63,6 @@ const PromotionController = {
             const description = body.description !== undefined ? body.description : existing.description;
             const is_active = body.is_active !== undefined ? body.is_active : existing.is_active;
 
-            // Kiểm tra Not Null bắt buộc
             if (!name || !discount_value || !start_date || !end_date) {
                  return res.status(400).json({ error: 'Name, discount, start date, and end date cannot be null.' });
             }

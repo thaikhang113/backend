@@ -39,7 +39,6 @@ const ServiceController = {
         }
     },
 
-    // --- FIX QUAN TRỌNG: DYNAMIC UPDATE LOGIC ---
     updateService: async (req, res) => {
         const { id } = req.params;
         const body = req.body;
@@ -49,13 +48,11 @@ const ServiceController = {
             if (existingResult.rows.length === 0) return res.status(404).json({ message: 'Service not found' });
             const existing = existingResult.rows[0];
 
-            // Service code không nên thay đổi
             const name = body.name !== undefined ? body.name : existing.name;
             const price = body.price !== undefined ? body.price : existing.price;
             const availability = body.availability !== undefined ? body.availability : existing.availability;
             const description = body.description !== undefined ? body.description : existing.description;
 
-            // Kiểm tra Not Null bắt buộc
             if (!name || price === null || price === undefined) {
                  return res.status(400).json({ error: 'Service name and price cannot be null.' });
             }
@@ -73,7 +70,6 @@ const ServiceController = {
     deleteService: async (req, res) => {
         const { id } = req.params;
         try {
-            // Thay vì xóa, dùng UPDATE availability = FALSE (Xóa mềm)
             const result = await db.query('UPDATE Services SET availability = FALSE WHERE service_id = $1 RETURNING *', [id]);
             if (result.rows.length === 0) return res.status(404).json({ message: 'Service not found' });
             res.json({ message: 'Service deactivated successfully (Soft Delete)' });

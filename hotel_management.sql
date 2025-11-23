@@ -1,18 +1,17 @@
 -- ============================================
--- DATABASE: Hotel Management System (FULL FIXED)
+-- DATABASE: Hotel Management System (NO AUTH/OTP)
 -- ============================================
 
--- 1. XÓA BẢNG CŨ (Để tạo lại từ đầu)
-DROP TABLE IF EXISTS Room_Status_History, Reviews, Invoices, Used_Services, Services, Booked_Rooms, Bookings, Rooms, Room_Types, Promotions, Reports, Users CASCADE;
+DROP TABLE IF EXISTS Room_Status_History, Reviews, Invoices, Used_Services, Services, Booked_Rooms, Bookings, Rooms, Room_Types, Promotions, Reports, Users;
 
 -- ==========================
--- 2. TẠO BẢNG (SCHEMA)
+-- TẠO BẢNG (SCHEMA)
 -- ==========================
 
--- TABLE: Users
+-- TABLE: Users (Đã xóa cột OTP)
 CREATE TABLE Users (
     user_id SERIAL PRIMARY KEY,
-    password_hash VARCHAR(255) NOT NULL,
+    password_hash VARCHAR(255) NOT NULL, -- Lưu plain text
     username VARCHAR(50) UNIQUE NOT NULL,
     email VARCHAR(100) UNIQUE NOT NULL,
     first_name VARCHAR(50),
@@ -24,9 +23,6 @@ CREATE TABLE Users (
     date_of_birth DATE,
     is_staff BOOLEAN DEFAULT FALSE,
     is_active BOOLEAN DEFAULT TRUE,
-    -- Các cột bổ sung cho tính năng mới
-    otp_code VARCHAR(10),
-    otp_expires_at TIMESTAMP,
     last_login TIMESTAMP
 );
 
@@ -35,7 +31,7 @@ CREATE TABLE Room_Types (
     room_type_id SERIAL PRIMARY KEY,
     name VARCHAR(100) UNIQUE NOT NULL,
     description TEXT,
-    is_active BOOLEAN DEFAULT TRUE -- Hỗ trợ xóa mềm
+    is_active BOOLEAN DEFAULT TRUE
 );
 
 -- TABLE: Rooms
@@ -77,15 +73,15 @@ CREATE TABLE Promotions (
     used_count INTEGER DEFAULT 0
 );
 
--- TABLE: Reports (Tính năng báo cáo)
+-- TABLE: Reports
 CREATE TABLE Reports (
     report_id SERIAL PRIMARY KEY,
     title VARCHAR(255) NOT NULL,
-    report_type VARCHAR(50) NOT NULL, -- 'daily', 'monthly', 'revenue'
+    report_type VARCHAR(50) NOT NULL, 
     start_date DATE,
     end_date DATE,
     total_revenue DECIMAL(15, 2) DEFAULT 0,
-    generated_content TEXT, -- JSON hoặc text
+    generated_content TEXT, 
     created_by INTEGER REFERENCES Users(user_id),
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
@@ -159,35 +155,35 @@ CREATE TABLE Room_Status_History (
 );
 
 -- ============================================
--- 3. THÊM DỮ LIỆU MẪU (DATA INSERTION)
+-- THÊM DỮ LIỆU MẪU (DATA INSERTION)
 -- ============================================
 
--- USERS
-INSERT INTO Users (password_hash, username, email, first_name, last_name, gender, phone_number, address, date_of_birth, is_staff, otp_code, otp_expires_at) VALUES
-('hash1', 'user1', 'user1@mail.com', 'First1', 'Last1', 'Female', '0900000001', 'City1', '1993-09-11', TRUE, '123456', NOW() + INTERVAL '10 minutes'),
-('hash2', 'user2', 'user2@mail.com', 'First2', 'Last2', 'Male', '0900000002', 'City2', '1998-03-21', TRUE, '654321', NOW() - INTERVAL '10 minutes'),
-('hash3', 'user3', 'user3@mail.com', 'First3', 'Last3', 'Female', '0900000003', 'City3', '1991-07-19', FALSE, NULL, NULL),
-('hash4', 'user4', 'user4@mail.com', 'First4', 'Last4', 'Male', '0900000004', 'City4', '1993-08-26', FALSE, NULL, NULL),
-('hash5', 'user5', 'user5@mail.com', 'First5', 'Last5', 'Female', '0900000005', 'City5', '1997-02-17', FALSE, NULL, NULL),
-('hash6', 'user6', 'user6@mail.com', 'First6', 'Last6', 'Male', '0900000006', 'City6', '1990-08-28', TRUE, NULL, NULL),
-('hash7', 'user7', 'user7@mail.com', 'First7', 'Last7', 'Female', '0900000007', 'City7', '1996-08-19', FALSE, NULL, NULL),
-('hash8', 'user8', 'user8@mail.com', 'First8', 'Last8', 'Male', '0900000008', 'City8', '1991-03-16', FALSE, NULL, NULL),
-('hash9', 'user9', 'user9@mail.com', 'First9', 'Last9', 'Female', '0900000009', 'City9', '1990-02-15', FALSE, NULL, NULL),
-('hash10', 'user10', 'user10@mail.com', 'First10', 'Last10', 'Male', '0900000010', 'City10', '1990-07-13', TRUE, NULL, NULL),
-('hash11', 'user11', 'user11@mail.com', 'First11', 'Last11', 'Female', '0900000011', 'City11', '1999-02-25', TRUE, NULL, NULL),
-('hash12', 'user12', 'user12@mail.com', 'First12', 'Last12', 'Male', '0900000012', 'City12', '1991-05-15', TRUE, NULL, NULL),
-('hash13', 'user13', 'user13@mail.com', 'First13', 'Last13', 'Female', '0900000013', 'City13', '1998-07-21', FALSE, NULL, NULL),
-('hash14', 'user14', 'user14@mail.com', 'First14', 'Last14', 'Male', '0900000014', 'City14', '1994-04-27', FALSE, NULL, NULL),
-('hash15', 'user15', 'user15@mail.com', 'First15', 'Last15', 'Female', '0900000015', 'City15', '1998-08-22', FALSE, NULL, NULL),
-('hash16', 'user16', 'user16@mail.com', 'First16', 'Last16', 'Male', '0900000016', 'City16', '1996-07-27', FALSE, NULL, NULL),
-('hash17', 'user17', 'user17@mail.com', 'First17', 'Last17', 'Female', '0900000017', 'City17', '1995-04-14', TRUE, NULL, NULL),
-('hash18', 'user18', 'user18@mail.com', 'First18', 'Last18', 'Male', '0900000018', 'City18', '1997-07-20', TRUE, NULL, NULL),
-('hash19', 'user19', 'user19@mail.com', 'First19', 'Last19', 'Female', '0900000019', 'City19', '1991-05-22', TRUE, NULL, NULL),
-('hash20', 'user20', 'user20@mail.com', 'First20', 'Last20', 'Male', '0900000020', 'City20', '1997-05-17', TRUE, NULL, NULL);
+-- USERS (Đã xóa cột OTP)
+INSERT INTO Users (password_hash, username, email, first_name, last_name, gender, phone_number, address, date_of_birth, is_staff) VALUES
+('hash1', 'user1', 'user1@mail.com', 'First1', 'Last1', 'Female', '0900000001', 'City1', '1993-09-11', TRUE),
+('hash2', 'user2', 'user2@mail.com', 'First2', 'Last2', 'Male', '0900000002', 'City2', '1998-03-21', TRUE),
+('hash3', 'user3', 'user3@mail.com', 'First3', 'Last3', 'Female', '0900000003', 'City3', '1991-07-19', FALSE),
+('hash4', 'user4', 'user4@mail.com', 'First4', 'Last4', 'Male', '0900000004', 'City4', '1993-08-26', FALSE),
+('hash5', 'user5', 'user5@mail.com', 'First5', 'Last5', 'Female', '0900000005', 'City5', '1997-02-17', FALSE),
+('hash6', 'user6', 'user6@mail.com', 'First6', 'Last6', 'Male', '0900000006', 'City6', '1990-08-28', TRUE),
+('hash7', 'user7', 'user7@mail.com', 'First7', 'Last7', 'Female', '0900000007', 'City7', '1996-08-19', FALSE),
+('hash8', 'user8', 'user8@mail.com', 'First8', 'Last8', 'Male', '0900000008', 'City8', '1991-03-16', FALSE),
+('hash9', 'user9', 'user9@mail.com', 'First9', 'Last9', 'Female', '0900000009', 'City9', '1990-02-15', FALSE),
+('hash10', 'user10', 'user10@mail.com', 'First10', 'Last10', 'Male', '0900000010', 'City10', '1990-07-13', TRUE),
+('hash11', 'user11', 'user11@mail.com', 'First11', 'Last11', 'Female', '0900000011', 'City11', '1999-02-25', TRUE),
+('hash12', 'user12', 'user12@mail.com', 'First12', 'Last12', 'Male', '0900000012', 'City12', '1991-05-15', TRUE),
+('hash13', 'user13', 'user13@mail.com', 'First13', 'Last13', 'Female', '0900000013', 'City13', '1998-07-21', FALSE),
+('hash14', 'user14', 'user14@mail.com', 'First14', 'Last14', 'Male', '0900000014', 'City14', '1994-04-27', FALSE),
+('hash15', 'user15', 'user15@mail.com', 'First15', 'Last15', 'Female', '0900000015', 'City15', '1998-08-22', FALSE),
+('hash16', 'user16', 'user16@mail.com', 'First16', 'Last16', 'Male', '0900000016', 'City16', '1996-07-27', FALSE),
+('hash17', 'user17', 'user17@mail.com', 'First17', 'Last17', 'Female', '0900000017', 'City17', '1995-04-14', TRUE),
+('hash18', 'user18', 'user18@mail.com', 'First18', 'Last18', 'Male', '0900000018', 'City18', '1997-07-20', TRUE),
+('hash19', 'user19', 'user19@mail.com', 'First19', 'Last19', 'Female', '0900000019', 'City19', '1991-05-22', TRUE),
+('hash20', 'user20', 'user20@mail.com', 'First20', 'Last20', 'Male', '0900000020', 'City20', '1997-05-17', TRUE);
 
--- Thêm User Admin hệ thống (để test Postman)
+-- Admin hệ thống
 INSERT INTO Users (password_hash, username, email, first_name, last_name, is_staff) 
-VALUES ('$2a$10$X7.x8/z.z9/z.z9/z.z9/z.z9/z.z9/z.z9/z.z9/z.z9', 'admin_system', 'admin@hotel.com', 'Admin', 'System', TRUE)
+VALUES ('admin123', 'admin_system', 'admin@hotel.com', 'Admin', 'System', TRUE)
 ON CONFLICT (username) DO NOTHING;
 
 -- ROOM TYPES

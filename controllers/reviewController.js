@@ -1,7 +1,6 @@
 const db = require('../config/db');
 
 const ReviewController = {
-    // 1. Lấy danh sách (Khớp với route.get('/'))
     getReviews: async (req, res) => {
         try {
             const result = await db.query(`
@@ -16,7 +15,6 @@ const ReviewController = {
         }
     },
 
-    // 2. Lấy chi tiết (Khớp với route.get('/:id'))
     getReviewById: async (req, res) => {
         try {
             const { id } = req.params;
@@ -28,10 +26,8 @@ const ReviewController = {
         }
     },
 
-    // 3. Thêm mới (Khớp với route.post('/'))
     addReview: async (req, res) => {
         const { booking_id, user_id, room_id, rating, comment } = req.body;
-        // Validate
         if (!booking_id || !rating) return res.status(400).json({ message: 'Thiếu booking_id hoặc rating' });
 
         try {
@@ -46,7 +42,6 @@ const ReviewController = {
         }
     },
 
-    // 4. Cập nhật (Khớp với route.put('/:id'))
     updateReview: async (req, res) => {
         const { id } = req.params;
         const { rating, comment } = req.body;
@@ -62,7 +57,6 @@ const ReviewController = {
         }
     },
 
-    // 5. Xóa (Khớp với route.delete('/:id'))
     deleteReview: async (req, res) => {
         const { id } = req.params;
         try {
