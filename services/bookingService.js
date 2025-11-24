@@ -37,7 +37,7 @@ const BookingService = {
         return newBooking;
     },
 
-    addServiceToRoom: async (bookingId, serviceCode, quantity) => {
+    addServiceToRoom: async (bookingId, serviceCode, quantity, roomId) => {
         const services = await Service.getAll();
         const selectedService = services.find(s => s.service_code === serviceCode);
         
@@ -47,7 +47,8 @@ const BookingService = {
             booking_id: bookingId,
             service_id: selectedService.service_id,
             quantity: quantity,
-            price: selectedService.price
+            price: selectedService.price,
+            room_id: roomId || null
         });
     },
 

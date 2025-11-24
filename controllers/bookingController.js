@@ -60,9 +60,11 @@ const BookingController = {
 
     addService: async (req, res) => {
         try {
-            const { serviceCode, quantity } = req.body;
+            
+
+            const { serviceCode, quantity, roomId } = req.body;
             const bookingId = req.params.id;
-            const result = await BookingService.addServiceToRoom(bookingId, serviceCode, quantity);
+            const result = await BookingService.addServiceToRoom(bookingId, serviceCode, quantity,roomId);
             res.json({ message: 'Thêm dịch vụ thành công', result });
         } catch (error) {
             res.status(400).json({ message: error.message });

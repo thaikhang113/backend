@@ -110,6 +110,7 @@ CREATE TABLE Used_Services (
     used_service_id SERIAL PRIMARY KEY,
     booking_id INTEGER REFERENCES Bookings(booking_id),
     service_id INTEGER REFERENCES Services(service_id),
+    room_id INTEGER REFERENCES Rooms(room_id),
     quantity INTEGER DEFAULT 1,
     service_price DECIMAL(10,2),
     service_date TIMESTAMP

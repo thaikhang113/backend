@@ -7,10 +7,10 @@ const Service = {
     },
 
     addUsedService: async (data) => {
-        const { booking_id, service_id, quantity, price } = data;
+        const { booking_id, service_id, quantity, price, room_id } = data;
         const res = await db.query(
-            'INSERT INTO Used_Services (booking_id, service_id, quantity, service_price, service_date) VALUES ($1, $2, $3, $4, NOW()) RETURNING *',
-            [booking_id, service_id, quantity, price]
+            'INSERT INTO Used_Services (booking_id, service_id, quantity, service_price, service_date, room_id) VALUES ($1, $2, $3, $4, NOW(), $5) RETURNING *',
+            [booking_id, service_id, quantity, price, room_id]
         );
         return res.rows[0];
     },
