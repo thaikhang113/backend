@@ -85,13 +85,13 @@ const updateCustomer = async (req, res) => {
 const deleteCustomer = async (req, res) => {
     const { id } = req.params;
     try {
-        const result = await db.query('UPDATE Users SET is_active = FALSE WHERE user_id = $1 AND is_staff = FALSE RETURNING user_id', [id]);
+        const result = await db.query('DELETE From Users where user_id = $1 RETURNING user_id', [id]);
         
         if (result.rows.length === 0) return res.status(404).json({ message: 'Customer not found' });
-        res.json({ message: 'Customer deactivated successfully (Soft Delete)' });
+        res.json({ message: 'Customer deleted successfully' });
     } catch (err) {
         if (err.code === '23503') {
-             return res.status(400).json({ error: 'Cannot delete: Customer has related records. Account set to inactive.' });
+             return res.status(400).json({ error: 'Cannot delete' });
         }
         res.status(500).json({ error: err.message });
     }
