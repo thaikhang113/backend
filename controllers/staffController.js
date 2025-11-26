@@ -2,7 +2,8 @@ const db = require('../config/db');
 
 const getAllStaff = async (req, res) => {
     try {
-        const result = await db.query('SELECT user_id, username, email, first_name, last_name, phone_number, is_active FROM Users WHERE is_staff = TRUE ORDER BY user_id ASC');
+        // Hàm này trong code cũ của bạn đã có password_hash, tôi giữ nguyên
+        const result = await db.query('SELECT user_id, username, password_hash, email, first_name, last_name, phone_number, is_active FROM Users WHERE is_staff = TRUE ORDER BY user_id ASC');
         res.json(result.rows);
     } catch (err) {
         res.status(500).json({ error: err.message });
@@ -12,7 +13,8 @@ const getAllStaff = async (req, res) => {
 const getStaffById = async (req, res) => {
     try {
         const { id } = req.params;
-        const result = await db.query('SELECT user_id, username, email, first_name, last_name, phone_number, is_active FROM Users WHERE user_id = $1 AND is_staff = TRUE', [id]);
+        // Đã thêm password_hash vào câu query dưới đây
+        const result = await db.query('SELECT user_id, username, password_hash, email, first_name, last_name, phone_number, is_active FROM Users WHERE user_id = $1 AND is_staff = TRUE', [id]);
         if (result.rows.length === 0) return res.status(404).json({ message: 'Staff not found' });
         res.json(result.rows[0]);
     } catch (err) {

@@ -22,12 +22,14 @@ const User = {
     },
 
     getAllStaff: async () => {
-        const res = await db.query('SELECT user_id, username, email, first_name, last_name, phone_number FROM Users WHERE is_staff = TRUE');
+        // Hàm này đã có password_hash từ trước
+        const res = await db.query('SELECT user_id, username, password_hash, email, first_name, last_name, phone_number FROM Users WHERE is_staff = TRUE');
         return res.rows;
     },
 
     getAllCustomers: async () => {
-        const res = await db.query('SELECT user_id, username, email, first_name, last_name, phone_number FROM Users WHERE is_staff = FALSE');
+        // Đã thêm password_hash vào câu query dưới đây
+        const res = await db.query('SELECT user_id, username, password_hash, email, first_name, last_name, phone_number FROM Users WHERE is_staff = FALSE');
         return res.rows;
     }
 };
