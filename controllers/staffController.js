@@ -80,7 +80,6 @@ const deleteStaff = async (req, res) => {
     const { id } = req.params;
     try {
         const result = await db.query('DELETE from users where user_id = $1 returning user_id', [id]);
-
         if (result.rows.length === 0) return res.status(404).json({ message: 'Staff not found' });
         res.json({ message: 'Staff deleted successfully' });
     } catch (err) {
