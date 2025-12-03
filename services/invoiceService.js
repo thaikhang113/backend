@@ -6,10 +6,13 @@ const InvoiceRepository = require('../repositories/invoiceRepository');
 const { sendInvoiceEmail } = require('../utils/email');
 
 const InvoiceService = {
-    calculateTotal: async (bookingId, promoCode) => {
-        const booking = await Booking.getById(bookingId);
-        const bookedRooms = await Booking.getBookedRooms(bookingId);
-        const usedServices = await Service.getUsedByBooking(bookingId);
+    // Thêm tham số client
+    calculateTotal: async (bookingId, promoCode, client = null) => {
+        const booking = await Booking.getById(bookingId, client);
+        if (!booking) throw new Error("Booking not found when calculating invoice");
+        
+        const bookedRooms = await Booking.getBookedRooms(bookingId, client);
+        const usedServices = await Service.getUsedByBooking(bookingId, client);
 
         // Calculate Room Cost
         const checkIn = new Date(booking.check_in);
@@ -33,7 +36,7 @@ const InvoiceService = {
 
         // Apply Promotion
         if (promoCode) {
-            const promo = await Promotion.findByCode(promoCode);
+            const promo = await Promotion.findByCode(promoCode, client);
             if (promo) {
                 if (promo.usage_limit > promo.used_count) {
                     promotionId = promo.promotion_id;
@@ -44,7 +47,11 @@ const InvoiceService = {
                     } else if (promo.scope === 'service') {
                         discountAmount = (totalServiceCost * promo.discount_value) / 100;
                     }
+                } else {
+                    throw new Error("Mã giảm giá đã hết lượt sử dụng");
                 }
+            } else {
+                 throw new Error("Mã giảm giá không hợp lệ hoặc đã hết hạn");
             }
         }
 
@@ -63,8 +70,8 @@ const InvoiceService = {
         };
     },
 
-    createInvoice: async (staffId, bookingId, promoCode) => {
-        const calculation = await InvoiceService.calculateTotal(bookingId, promoCode);
+    createInvoice: async (staffId, bookingId, promoCode, client = null) => {
+        const calculation = await InvoiceService.calculateTotal(bookingId, promoCode, client);
         
         const newInvoice = await Invoice.create({
             booking_id: bookingId,
@@ -74,16 +81,21 @@ const InvoiceService = {
             discount: calculation.discountAmount,
             final_total: calculation.finalTotal,
             promo_id: calculation.promotionId
-        });
+        }, client);
 
         if (calculation.promotionId) {
-            await Promotion.incrementUsage(calculation.promotionId);
+            await Promotion.incrementUsage(calculation.promotionId, client);
         }
 
-        // Send email asynchronously
-        const invoiceDetail = await InvoiceRepository.getInvoiceDetailFull(newInvoice.invoice_id);
-        if (invoiceDetail && invoiceDetail.info.email) {
-            sendInvoiceEmail(invoiceDetail.info.email, newInvoice).catch(console.error);
+        // Send email asynchronously (Chỉ gửi khi transaction thành công, nhưng ở đây gửi luôn cũng được vì try/catch ở controller)
+        // Lưu ý: InvoiceRepository dùng db mặc định, có thể không thấy dữ liệu trong transaction.
+        // Nên chỉ gửi email SAU KHI commit transaction ở controller nếu muốn chắc chắn.
+        // Tạm thời để ở đây nhưng bọc trong setImmediate để không block
+        if (!client) { // Chỉ gửi email nếu không trong transaction, hoặc xử lý sau
+             const invoiceDetail = await InvoiceRepository.getInvoiceDetailFull(newInvoice.invoice_id);
+             if (invoiceDetail && invoiceDetail.info.email) {
+                 sendInvoiceEmail(invoiceDetail.info.email, newInvoice).catch(console.error);
+             }
         }
 
         return newInvoice;

@@ -44,22 +44,22 @@ const ServiceController = {
         const body = req.body;
         
         try {
-            const existingResult = await db.query('SELECT service_code, name, price, availability, description FROM Services WHERE service_id = $1', [id]);
+            const existingResult = await db.query('SELECT * FROM Services WHERE service_id = $1', [id]);
             if (existingResult.rows.length === 0) return res.status(404).json({ message: 'Service not found' });
             const existing = existingResult.rows[0];
 
             const name = body.name !== undefined ? body.name : existing.name;
             const price = body.price !== undefined ? body.price : existing.price;
-            const availability = body.availability !== undefined ? body.availability : existing.availability;
             const description = body.description !== undefined ? body.description : existing.description;
+            const availability = body.availability !== undefined ? body.availability : existing.availability;
 
             if (!name || price === null || price === undefined) {
                  return res.status(400).json({ error: 'Service name and price cannot be null.' });
             }
 
             const result = await db.query(
-                'UPDATE Services SET name = $1, price = $2, availability = $3, description = $4 WHERE service_id = $5 RETURNING *',
-                [name, price, availability, description, id]
+                'UPDATE Services SET name = $1, price = $2, description = $3, availability = $4 WHERE service_id = $5 RETURNING *',
+                [name, price, description, availability, id]
             );
             res.json(result.rows[0]);
         } catch (err) {
@@ -67,15 +67,17 @@ const ServiceController = {
         }
     },
 
+    // CẬP NHẬT: Xóa hẳn khỏi database (Hard Delete)
     deleteService: async (req, res) => {
         const { id } = req.params;
         try {
-            const result = await db.query('UPDATE Services SET availability = FALSE WHERE service_id = $1 RETURNING *', [id]);
+            const result = await db.query('DELETE FROM Services WHERE service_id = $1 RETURNING *', [id]);
             if (result.rows.length === 0) return res.status(404).json({ message: 'Service not found' });
-            res.json({ message: 'Service deactivated successfully (Soft Delete)' });
+            res.json({ message: 'Service deleted permanently.' });
         } catch (err) {
+            // Lỗi ràng buộc khóa ngoại
             if (err.code === '23503') {
-                 return res.status(400).json({ error: 'Cannot delete: Booking records are linked to this service. Service set to inactive.' });
+                 return res.status(400).json({ error: 'Không thể xóa: Dịch vụ này đã có trong lịch sử đặt phòng.' });
             }
             res.status(500).json({ error: err.message });
         }

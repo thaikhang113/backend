@@ -2,7 +2,7 @@ const db = require('../config/db');
 
 const BookingRepository = {
     // Kiểm tra phòng có trống trong khoảng thời gian cụ thể không (Chính xác tuyệt đối)
-    isRoomAvailable: async (roomId, checkIn, checkOut) => {
+    isRoomAvailable: async (roomId, checkIn, checkOut, client = db) => {
         const query = `
             SELECT COUNT(*) as count
             FROM Booked_Rooms br
@@ -15,7 +15,7 @@ const BookingRepository = {
                 ($2 <= b.check_in AND $3 >= b.check_out)
             );
         `;
-        const res = await db.query(query, [roomId, checkIn, checkOut]);
+        const res = await client.query(query, [roomId, checkIn, checkOut]);
         return parseInt(res.rows[0].count) === 0;
     },
 

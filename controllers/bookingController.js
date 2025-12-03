@@ -3,6 +3,7 @@ const BookingService = require('../services/bookingService');
 const InvoiceService = require('../services/invoiceService');
 
 const getFullBookingInfo = async (bookingId) => {
+    // Logic lấy thông tin hiển thị (không cần transaction vì dữ liệu đã commit)
     const bookingQuery = `
         SELECT 
             b.booking_id, b.check_in, b.check_out, b.total_guests, b.status, b.booking_date,
@@ -36,7 +37,6 @@ const getFullBookingInfo = async (bookingId) => {
     `;
     const servicesRes = await db.query(servicesQuery, [bookingId]);
 
-    // Tính toán hiển thị tiền (Ưu tiên lấy từ hóa đơn nếu đã có)
     let totalMoney = booking.final_amount ? parseFloat(booking.final_amount) : 0;
     
     if (!booking.final_amount) {
@@ -82,37 +82,38 @@ const getFullBookingInfo = async (bookingId) => {
 
 const BookingController = {
     createBooking: async (req, res) => {
+        const client = await db.getClient();
         try {
-            // 1. BẮT BUỘC lấy user_id từ body (Không dùng req.user nữa)
+            await client.query('BEGIN'); // Bắt đầu transaction
+
             const userId = req.body.user_id;
             if (!userId) {
-                return res.status(400).json({ message: "Lỗi: Vui lòng cung cấp 'user_id' trong body." });
+                throw new Error("Vui lòng cung cấp 'user_id'.");
             }
 
-            // 2. Lấy mã giảm giá từ body
             const { promotionCode } = req.body;
 
-            // 3. Tạo Booking (và lưu services kèm theo)
-            const booking = await BookingService.createBooking(userId, req.body);
+            // 1. Tạo Booking + Phòng + Dịch vụ (trong cùng transaction)
+            const booking = await BookingService.createBooking(userId, req.body, client);
 
-            // 4. Tự động tạo Invoice ngay lập tức để áp dụng mã giảm giá
-            // (Sử dụng ID 1 - Admin làm người tạo hóa đơn, hoặc chính userId)
-            try {
-                await InvoiceService.createInvoice(1, booking.booking_id, promotionCode);
-            } catch (err) {
-                console.log("Lưu ý: Không thể tạo hóa đơn tự động (có thể do mã giảm giá sai hoặc lỗi khác).", err.message);
-                // Không throw lỗi ở đây để Booking vẫn thành công, chỉ là chưa có hóa đơn
-            }
-            
-            // 5. Lấy lại thông tin đầy đủ (đã bao gồm Invoice/Promotion nếu tạo thành công)
+            // 2. Tạo Invoice + Áp mã giảm giá (dùng chung transaction để thấy booking vừa tạo)
+            await InvoiceService.createInvoice(1, booking.booking_id, promotionCode, client);
+
+            await client.query('COMMIT'); // Lưu tất cả vào DB
+
+            // 3. Lấy lại thông tin đầy đủ để trả về
             const fullDetail = await getFullBookingInfo(booking.booking_id);
             
             res.status(201).json({
-                message: 'Đặt phòng thành công',
+                message: 'Đặt phòng và áp dụng dịch vụ/khuyến mãi thành công',
                 data: fullDetail
             });
         } catch (error) {
+            await client.query('ROLLBACK'); // Hủy toàn bộ nếu có lỗi
+            console.error("Booking Transaction Failed:", error);
             res.status(400).json({ message: error.message });
+        } finally {
+            client.release();
         }
     },
 
@@ -146,6 +147,8 @@ const BookingController = {
             const targetRoomId = roomId || room_id;
             const bookingId = req.params.id;
             
+            // Hàm addServiceToRoom có thể cần update nếu muốn hỗ trợ transaction, 
+            // nhưng ở đây request đơn lẻ nên dùng db mặc định là ổn.
             const result = await BookingService.addServiceToRoom(bookingId, serviceCode, quantity, targetRoomId);
             res.json({ message: 'Thêm dịch vụ thành công', result });
         } catch (error) {

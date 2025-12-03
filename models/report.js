@@ -11,6 +11,7 @@ const Report = {
     },
 
     getRevenueByRange: async (startDate, endDate) => {
+        // Tính tổng doanh thu từ các hóa đơn ĐÃ THANH TOÁN (paid)
         const res = await db.query(`
             SELECT SUM(final_amount) as total_revenue, COUNT(invoice_id) as total_invoices
             FROM Invoices
@@ -22,6 +23,12 @@ const Report = {
     getAll: async () => {
         const res = await db.query('SELECT * FROM Reports ORDER BY created_at DESC');
         return res.rows;
+    },
+
+    // CẬP NHẬT: Hàm xóa báo cáo
+    delete: async (id) => {
+        const res = await db.query('DELETE FROM Reports WHERE report_id = $1 RETURNING *', [id]);
+        return res.rows[0];
     }
 };
 

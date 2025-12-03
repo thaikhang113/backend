@@ -8,11 +8,13 @@ const BookingService = {
         return await BookingRepository.findAvailableRoomsByType(roomTypeId, checkIn, checkOut);
     },
 
-    createBooking: async (userId, bookingData) => {
+    // Thêm tham số client để hỗ trợ transaction
+    createBooking: async (userId, bookingData, client = null) => {
         const { room_ids, check_in, check_out, total_guests, services } = bookingData;
 
         for (const roomId of room_ids) {
-            const isAvailable = await BookingRepository.isRoomAvailable(roomId, check_in, check_out);
+            // Truyền client vào Repository
+            const isAvailable = await BookingRepository.isRoomAvailable(roomId, check_in, check_out, client);
             if (!isAvailable) {
                 throw new Error(`Phòng ${roomId} không còn trống trong khoảng thời gian này`);
             }
@@ -23,16 +25,16 @@ const BookingService = {
             check_in, 
             check_out, 
             total_guests 
-        });
+        }, client);
 
         for (const roomId of room_ids) {
-            const room = await Room.getById(roomId);
-            await Booking.addRoom(newBooking.booking_id, roomId, room.price_per_night);
-            await Room.updateStatus(roomId, 'booked');
+            const room = await Room.getById(roomId, client);
+            await Booking.addRoom(newBooking.booking_id, roomId, room.price_per_night, client);
+            await Room.updateStatus(roomId, 'booked', client);
         }
 
         if (services && Array.isArray(services) && services.length > 0) {
-            const allServices = await Service.getAll();
+            const allServices = await Service.getAll(client);
             
             for (const item of services) {
                 const selectedService = allServices.find(s => s.service_code === item.serviceCode);
@@ -43,7 +45,7 @@ const BookingService = {
                         quantity: item.quantity || 1,
                         price: selectedService.price,
                         room_id: item.roomId || null 
-                    });
+                    }, client);
                 }
             }
         }
