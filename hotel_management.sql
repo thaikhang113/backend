@@ -86,7 +86,11 @@ CREATE TABLE Bookings (
     check_in TIMESTAMP,
     check_out TIMESTAMP,
     status VARCHAR(20) DEFAULT 'pending',
-    total_guests INTEGER
+    total_guests INTEGER,
+    promotion_id INTEGER REFERENCES Promotions(promotion_id),
+    number_of_days INTEGER,
+    number_of_nights INTEGER,
+    total_price DECIMAL(10,2)
 );
 
 -- ==========================
