@@ -13,8 +13,8 @@ RUN npm install
 # Copy toàn bộ code vào container
 COPY . .
 
-# Mở port 3000
-EXPOSE 3000
+# Mở port 5000
+EXPOSE 5000
 
 # Lệnh chạy server
 CMD ["npm", "start"]
