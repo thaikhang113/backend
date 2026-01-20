@@ -57,13 +57,13 @@ const updateRoom = async (req, res) => {
 
 const updateRoomStatus = async (req, res) => {
     const { id } = req.params;
-    const { status } = req.body; 
+    const { status } = req.body;
     const userId = req.user ? req.user.user_id : 0;
 
     try {
         const oldRoom = await db.query('SELECT status FROM Rooms WHERE room_id = $1', [id]);
         if (oldRoom.rows.length === 0) return res.status(404).json({ message: 'Room not found' });
-        
+
         const oldStatus = oldRoom.rows[0].status;
 
         const result = await db.query(
@@ -82,6 +82,12 @@ const updateRoomStatus = async (req, res) => {
 const deleteRoom = async (req, res) => {
     const { id } = req.params;
     try {
+        // Delete related history first
+        await db.query('DELETE FROM Room_Status_History WHERE room_id = $1', [id]);
+        // Also check if there are any other dependencies like Booked_Rooms if not handled by CASCADE
+        // (Assuming Booked_Rooms are handled by Booking deletion, but for safety in generic delete:)
+        // await db.query('DELETE FROM Booked_Rooms WHERE room_id = $1', [id]); 
+
         const result = await db.query('DELETE FROM Rooms WHERE room_id = $1 RETURNING room_id', [id]);
         if (result.rows.length === 0) return res.status(404).json({ message: 'Room not found' });
         res.json({ message: 'Room deleted' });
