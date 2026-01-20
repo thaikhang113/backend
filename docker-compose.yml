@@ -8,7 +8,7 @@ services:
     restart: always
     environment:
       POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: root
+      POSTGRES_PASSWORD: Khag12344@
       POSTGRES_DB: hotel_management
     ports:
       - "5432:5432" # Mở port ra ngoài nếu muốn connect từ máy tính cá nhân
@@ -26,7 +26,7 @@ services:
     environment:
       - DB_HOST=db          # Quan trọng: Trong Docker, host là tên service (db), không phải localhost
       - DB_USER=postgres
-      - DB_PASSWORD=root
+      - DB_PASSWORD=Khag12344@
       - DB_NAME=hotel_management
       - DB_PORT=5432
       - PORT=5000
