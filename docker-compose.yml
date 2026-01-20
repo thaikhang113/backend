@@ -26,7 +26,7 @@ services:
     environment:
       - DB_HOST=db          # Quan trọng: Trong Docker, host là tên service (db), không phải localhost
       - DB_USER=postgres
-      - DB_PASSWORD=Khag12344@
+      - DB_PASSWORD=root
       - DB_NAME=hotel_management
       - DB_PORT=5432
       - PORT=5000
