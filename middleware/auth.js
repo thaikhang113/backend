@@ -22,10 +22,14 @@ const authMiddleware = async (req, res, next) => {
 };
 
 const adminGuard = (req, res, next) => {
-    if (req.user && req.user.is_staff) {
+    // Disabled strict permission check as per requirement.
+    // We still keep the middleware to ensure req.user is available if needed,
+    // but we no longer block non-staff users.
+    if (req.user) {
         next();
     } else {
-        res.status(403).json({ message: 'Forbidden: Admin/Staff access required' });
+        // Fallback if authMiddleware failed to attach user (should not happen if used correctly)
+        res.status(401).json({ message: 'Unauthorized: No user found' });
     }
 };
 
