@@ -24,7 +24,7 @@ services:
     ports:
       - "5000:5000"
     environment:
-      - DB_HOST=db          # Quan trọng: Trong Docker, host là tên service (db), không phải localhost
+      - DB_HOST=db # Quan trọng: Trong Docker, host là tên service (db), không phải localhost
       - DB_USER=postgres
       - DB_PASSWORD=root
       - DB_NAME=hotel_management
