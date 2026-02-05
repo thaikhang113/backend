@@ -9,7 +9,16 @@ const getAllCustomers = async (req, res) => {
         res.status(500).json({ error: err.message });
     }
 };
-
+const getCustomerByEmail = async (req, res) => {
+    const { email } = req.params;
+    try {
+        const result = await db.query('SELECT * FROM Users WHERE email = $1', [email]);
+        if (result.rows.length === 0) return res.status(404).json({ message: 'User not found' });
+        res.json(result.rows[0]);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+};
 const getCustomerById = async (req, res) => {
     try {
         const { id } = req.params;

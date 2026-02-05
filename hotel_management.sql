@@ -165,83 +165,92 @@ CREATE TABLE Room_Status_History (
 -- ============================================
 
 -- USERS
-INSERT INTO Users (password_hash, username, email, first_name, last_name, gender, phone_number, address, date_of_birth, is_staff) VALUES
-('hash1', 'user1', 'user1@mail.com', 'First1', 'Last1', 'Female', '0900000001', 'City1', '1993-09-11', TRUE),
-('hash2', 'user2', 'user2@mail.com', 'First2', 'Last2', 'Male', '0900000002', 'City2', '1998-03-21', TRUE),
-('hash3', 'user3', 'user3@mail.com', 'First3', 'Last3', 'Female', '0900000003', 'City3', '1991-07-19', FALSE),
-('hash4', 'user4', 'user4@mail.com', 'First4', 'Last4', 'Male', '0900000004', 'City4', '1993-08-26', FALSE),
-('hash5', 'user5', 'user5@mail.com', 'First5', 'Last5', 'Female', '0900000005', 'City5', '1997-02-17', FALSE),
-('hash6', 'user6', 'user6@mail.com', 'First6', 'Last6', 'Male', '0900000006', 'City6', '1990-08-28', TRUE),
-('hash7', 'user7', 'user7@mail.com', 'First7', 'Last7', 'Female', '0900000007', 'City7', '1996-08-19', FALSE),
-('hash8', 'user8', 'user8@mail.com', 'First8', 'Last8', 'Male', '0900000008', 'City8', '1991-03-16', FALSE),
-('hash9', 'user9', 'user9@mail.com', 'First9', 'Last9', 'Female', '0900000009', 'City9', '1990-02-15', FALSE),
-('hash10', 'user10', 'user10@mail.com', 'First10', 'Last10', 'Male', '0900000010', 'City10', '1990-07-13', TRUE),
-('hash11', 'user11', 'user11@mail.com', 'First11', 'Last11', 'Female', '0900000011', 'City11', '1999-02-25', TRUE),
-('hash12', 'user12', 'user12@mail.com', 'First12', 'Last12', 'Male', '0900000012', 'City12', '1991-05-15', TRUE),
-('hash13', 'user13', 'user13@mail.com', 'First13', 'Last13', 'Female', '0900000013', 'City13', '1998-07-21', FALSE),
-('hash14', 'user14', 'user14@mail.com', 'First14', 'Last14', 'Male', '0900000014', 'City14', '1994-04-27', FALSE),
-('hash15', 'user15', 'user15@mail.com', 'First15', 'Last15', 'Female', '0900000015', 'City15', '1998-08-22', FALSE),
-('hash16', 'user16', 'user16@mail.com', 'First16', 'Last16', 'Male', '0900000016', 'City16', '1996-07-27', FALSE),
-('hash17', 'user17', 'user17@mail.com', 'First17', 'Last17', 'Female', '0900000017', 'City17', '1995-04-14', TRUE),
-('hash18', 'user18', 'user18@mail.com', 'First18', 'Last18', 'Male', '0900000018', 'City18', '1997-07-20', TRUE),
-('hash19', 'user19', 'user19@mail.com', 'First19', 'Last19', 'Female', '0900000019', 'City19', '1991-05-22', TRUE),
-('hash20', 'user20', 'user20@mail.com', 'First20', 'Last20', 'Male', '0900000020', 'City20', '1997-05-17', TRUE);
+INSERT INTO Users 
+(password_hash, username, email, first_name, last_name, gender, phone_number, address, date_of_birth, is_staff) 
+VALUES
+('123', 'nguyenvana', 'an.nguyen@gmail.com', 'An', 'Nguyễn Văn', 'Male', '0905123456', 'Quận 1, TP.HCM', '1993-09-11', TRUE),
+('123', 'tranthib', 'bich.tran@gmail.com', 'Bích', 'Trần Thị', 'Female', '0905234567', 'Quận Hải Châu, Đà Nẵng', '1998-03-21', TRUE),
+('123', 'lehoangc', 'cuong.le@gmail.com', 'Cường', 'Lê Hoàng', 'Male', '0905345678', 'Quận Cầu Giấy, Hà Nội', '1991-07-19', FALSE),
+('123', 'phamthid', 'dung.pham@gmail.com', 'Dung', 'Phạm Thị', 'Female', '0905456789', 'TP. Thủ Đức, TP.HCM', '1993-08-26', FALSE),
+('123', 'vominhe', 'em.vo@gmail.com', 'Em', 'Võ Minh', 'Male', '0905567890', 'TP. Biên Hòa, Đồng Nai', '1997-02-17', FALSE),
+('123', 'dothif', 'fiona.do@gmail.com', 'Phương', 'Đỗ Thị', 'Female', '0905678901', 'TP. Nha Trang, Khánh Hòa', '1990-08-28', TRUE),
+('123', 'buingocg', 'giang.bui@gmail.com', 'Giang', 'Bùi Ngọc', 'Female', '0905789012', 'TP. Huế, Thừa Thiên Huế', '1996-08-19', FALSE),
+('123', 'hoangminhh', 'hoang.minh@gmail.com', 'Hoàng', 'Nguyễn Minh', 'Male', '0905890123', 'Quận Bình Thạnh, TP.HCM', '1991-03-16', FALSE),
+('123', 'truongthui', 'ivy.truong@gmail.com', 'Thư', 'Trương Thu', 'Female', '0905901234', 'TP. Cần Thơ', '1990-02-15', FALSE),
+('123', 'nguyenk', 'khanh.nguyen@gmail.com', 'Khánh', 'Nguyễn', 'Male', '0906012345', 'Quận Ba Đình, Hà Nội', '1990-07-13', TRUE),
+('123', 'lethel', 'linh.le@gmail.com', 'Linh', 'Lê Thế', 'Female', '0906123456', 'Quận 7, TP.HCM', '1999-02-25', TRUE),
+('123', 'phammanhm', 'manh.pham@gmail.com', 'Mạnh', 'Phạm Anh', 'Male', '0906234567', 'TP. Vũng Tàu', '1991-05-15', TRUE),
+('123', 'ngoquynhn', 'ngoc.ngo@gmail.com', 'Ngọc', 'Ngô Quỳnh', 'Female', '0906345678', 'TP. Đà Lạt, Lâm Đồng', '1998-07-21', FALSE),
+('123', 'tranducp', 'phu.tran@gmail.com', 'Phú', 'Trần Đức', 'Male', '0906456789', 'TP. Quy Nhơn, Bình Định', '1994-04-27', FALSE),
+('123', 'vuthiq', 'quyen.vu@gmail.com', 'Quyên', 'Vũ Thị', 'Female', '0906567890', 'TP. Long Xuyên, An Giang', '1998-08-22', FALSE),
+('123', 'hoangr', 'ron.hoang@gmail.com', 'Rôn', 'Hoàng', 'Male', '0906678901', 'TP. Rạch Giá, Kiên Giang', '1996-07-27', FALSE),
+('123', 'dangs', 'son.dang@gmail.com', 'Sơn', 'Đặng', 'Male', '0906789012', 'Quận Thanh Xuân, Hà Nội', '1995-04-14', TRUE),
+('123', 'lythit', 'thao.ly@gmail.com', 'Thảo', 'Lý Thị', 'Female', '0906890123', 'TP. Bắc Ninh, Bắc Ninh', '1997-07-20', TRUE),
+('123', 'phungu', 'uyen.phung@gmail.com', 'Uyên', 'Phùng', 'Female', '0906901234', 'TP. Buôn Ma Thuột, Đắk Lắk', '1991-05-22', TRUE),
+('123', 'tranv', 'viet.tran@gmail.com', 'Việt', 'Trần', 'Male', '0906011122', 'TP. Hải Phòng', '1997-05-17', TRUE);
 
 -- ROOM TYPES
 INSERT INTO Room_Types (name, description) VALUES
-('Standard', 'Basic room with one bed'),
-('Deluxe', 'Spacious room with city view'),
-('Suite', 'Luxury room with living area and kitchen'),
-('Family', 'Large room for family stay'),
-('Business', 'Room with working desk and Wi-Fi');
+('Standard', 'Phòng tiêu chuẩn với 1 giường đôi hoặc queen, đầy đủ tiện nghi cơ bản, phù hợp khách lưu trú ngắn ngày'),
+('Deluxe', 'Phòng cao cấp rộng rãi hơn, cửa sổ lớn hoặc view thành phố, nội thất hiện đại và thoải mái'),
+('Suite', 'Phòng hạng sang có khu tiếp khách riêng, giường king size và phòng tắm cao cấp'),
+('Family', 'Phòng diện tích lớn dành cho gia đình, nhiều giường ngủ và không gian sinh hoạt chung'),
+('Twin', 'Phòng gồm 2 giường đơn riêng biệt, phù hợp bạn bè hoặc khách đi công tác cùng nhau');
+
 
 -- ROOMS
-INSERT INTO Rooms (room_number, room_type_id, floor, price_per_night, max_guests, bed_count, description, status) VALUES
-('101', 4, 4, 580000, 2, 2, 'Room description 1', 'booked'),
-('102', 1, 3, 1498000, 3, 2, 'Room description 2', 'available'),
-('103', 3, 1, 812000, 3, 3, 'Room description 3', 'booked'),
-('104', 2, 3, 623000, 5, 2, 'Room description 4', 'available'),
-('105', 2, 3, 1385000, 3, 2, 'Room description 5', 'maintenance'),
-('106', 3, 5, 539000, 2, 1, 'Room description 6', 'booked'),
-('107', 3, 4, 1011000, 4, 3, 'Room description 7', 'available'),
-('108', 1, 4, 1418000, 3, 3, 'Room description 8', 'booked'),
-('109', 5, 2, 694000, 2, 1, 'Room description 9', 'booked'),
-('110', 5, 2, 905000, 2, 2, 'Room description 10', 'booked'),
-('111', 4, 5, 888000, 2, 3, 'Room description 11', 'booked'),
-('112', 2, 5, 1370000, 2, 3, 'Room description 12', 'maintenance'),
-('113', 3, 2, 1441000, 2, 1, 'Room description 13', 'maintenance'),
-('114', 5, 2, 1152000, 2, 1, 'Room description 14', 'booked'),
-('115', 4, 3, 496000, 4, 2, 'Room description 15', 'booked'),
-('116', 5, 2, 421000, 2, 1, 'Room description 16', 'available'),
-('117', 1, 3, 1089000, 3, 3, 'Room description 17', 'booked'),
-('118', 2, 1, 1289000, 5, 1, 'Room description 18', 'maintenance'),
-('119', 3, 3, 659000, 2, 2, 'Room description 19', 'maintenance'),
-('120', 2, 3, 1321000, 5, 3, 'Room description 20', 'maintenance'),
-('121', 3, 4, 921000, 4, 2, 'Room description 21', 'available'),
-('122', 2, 3, 907000, 4, 2, 'Room description 22', 'booked'),
-('123', 4, 4, 848000, 4, 3, 'Room description 23', 'available'),
-('124', 1, 5, 1498000, 4, 3, 'Room description 24', 'available'),
-('125', 2, 3, 406000, 4, 2, 'Room description 25', 'booked'),
-('126', 1, 1, 1270000, 5, 1, 'Room description 26', 'maintenance'),
-('127', 2, 1, 861000, 3, 3, 'Room description 27', 'available'),
-('128', 4, 1, 424000, 4, 2, 'Room description 28', 'booked'),
-('129', 1, 3, 815000, 3, 3, 'Room description 29', 'maintenance'),
-('130', 5, 2, 1432000, 4, 2, 'Room description 30', 'booked');
+INSERT INTO Rooms 
+(room_number, room_type_id, floor, price_per_night, max_guests, bed_count, description, status) 
+VALUES
+('101', 4, 4, 750000, 2, 2, 'Phòng Twin hướng thành phố, 2 giường đơn, phù hợp bạn bè hoặc đồng nghiệp', 'booked'),
+('102', 1, 3, 950000, 2, 1, 'Phòng Standard giường đôi, thiết kế hiện đại, đầy đủ tiện nghi cơ bản', 'available'),
+('103', 3, 1, 1200000, 4, 2, 'Phòng Family rộng rãi, 1 giường đôi và 1 giường đơn, phù hợp gia đình nhỏ', 'booked'),
+('104', 2, 3, 1100000, 3, 1, 'Phòng Deluxe giường queen, có cửa sổ lớn đón ánh sáng tự nhiên', 'available'),
+('105', 2, 3, 1150000, 3, 1, 'Phòng Deluxe view thành phố, nội thất cao cấp, đang bảo trì điều hòa', 'maintenance'),
+('106', 3, 5, 1350000, 4, 2, 'Phòng Family tầng cao, không gian yên tĩnh, phù hợp gia đình nghỉ dưỡng', 'booked'),
+('107', 3, 4, 1280000, 4, 2, 'Phòng Family có ban công nhỏ, bàn làm việc và khu tiếp khách', 'available'),
+('108', 1, 4, 980000, 2, 1, 'Phòng Standard giường đôi, gần thang máy, thuận tiện di chuyển', 'booked'),
+('109', 5, 2, 1800000, 2, 1, 'Phòng Suite cao cấp, phòng khách riêng và giường king size', 'booked'),
+('110', 5, 2, 1850000, 2, 1, 'Suite hướng vườn, bồn tắm nằm, không gian sang trọng', 'booked'),
+('111', 4, 5, 820000, 2, 2, 'Phòng Twin tầng cao, 2 giường đơn, cửa sổ lớn nhìn ra thành phố', 'booked'),
+('112', 2, 5, 1180000, 3, 1, 'Phòng Deluxe tầng cao, đang bảo trì hệ thống nước nóng', 'maintenance'),
+('113', 3, 2, 1250000, 4, 2, 'Phòng Family gần khu tiện ích, hiện đang bảo trì nội thất', 'maintenance'),
+('114', 5, 2, 1750000, 2, 1, 'Suite sang trọng với khu tiếp khách riêng và minibar miễn phí', 'booked'),
+('115', 4, 3, 780000, 2, 2, 'Phòng Twin tiêu chuẩn, phù hợp khách công tác', 'booked'),
+('116', 5, 2, 1700000, 2, 1, 'Suite rộng rãi, sofa tiếp khách, phòng tắm cao cấp', 'available'),
+('117', 1, 3, 970000, 2, 1, 'Phòng Standard nội thất gỗ ấm cúng, phù hợp cặp đôi', 'booked'),
+('118', 2, 1, 1050000, 3, 1, 'Phòng Deluxe tầng thấp, hiện đang bảo trì hệ thống điện', 'maintenance'),
+('119', 3, 3, 1230000, 4, 2, 'Phòng Family thiết kế hiện đại, đang tạm ngưng để bảo trì', 'maintenance'),
+('120', 2, 3, 1120000, 3, 1, 'Phòng Deluxe view nội khu, đang bảo trì thiết bị vệ sinh', 'maintenance'),
+('121', 3, 4, 1300000, 4, 2, 'Phòng Family tầng cao, cửa sổ lớn, phù hợp gia đình 4 người', 'available'),
+('122', 2, 3, 1090000, 3, 1, 'Phòng Deluxe gần khu thang máy, thuận tiện di chuyển', 'booked'),
+('123', 4, 4, 800000, 2, 2, 'Phòng Twin view thành phố, không gian sáng sủa', 'available'),
+('124', 1, 5, 990000, 2, 1, 'Phòng Standard tầng cao, yên tĩnh, phù hợp nghỉ dưỡng', 'available'),
+('125', 2, 3, 1020000, 3, 1, 'Phòng Deluxe nội thất hiện đại, phù hợp khách công tác dài ngày', 'booked'),
+('126', 1, 1, 900000, 2, 1, 'Phòng Standard tầng thấp, hiện đang bảo trì điều hòa', 'maintenance'),
+('127', 2, 1, 1070000, 3, 1, 'Phòng Deluxe gần sảnh, thuận tiện cho gia đình có trẻ nhỏ', 'available'),
+('128', 4, 1, 760000, 2, 2, 'Phòng Twin tầng thấp, 2 giường đơn, phù hợp khách đi cùng bạn', 'booked'),
+('129', 1, 3, 930000, 2, 1, 'Phòng Standard đang bảo trì nội thất và sơn sửa lại tường', 'maintenance'),
+('130', 5, 2, 1900000, 2, 1, 'Suite cao cấp nhất tầng, không gian rộng, phòng khách riêng biệt', 'booked');
 
 -- SERVICES
 INSERT INTO Services (service_code, name, price, availability, description) VALUES
-('SV001', 'Laundry', 50000, TRUE, 'Laundry and ironing service'),
-('SV002', 'Breakfast', 100000, TRUE, 'Buffet breakfast'),
-('SV003', 'Airport Pickup', 200000, TRUE, 'Pickup from airport'),
-('SV004', 'Spa', 300000, TRUE, 'Relaxing massage and spa'),
-('SV005', 'Dinner', 250000, TRUE, 'Dinner buffet at restaurant'),
-('SV006', 'Mini Bar', 150000, TRUE, 'In-room mini bar');
+('SV001', 'Giặt Ủi', 50000, TRUE, 'Dịch vụ giặt và ủi quần áo trong ngày dành cho khách lưu trú'),
+('SV002', 'Bữa Sáng Buffet', 120000, TRUE, 'Buffet sáng đa dạng món Á - Âu, phục vụ tại nhà hàng khách sạn'),
+('SV003', 'Đưa Đón Sân Bay', 250000, TRUE, 'Dịch vụ xe đưa đón sân bay riêng, đặt trước tại quầy lễ tân'),
+('SV004', 'Spa & Massage', 350000, TRUE, 'Liệu trình massage thư giãn và chăm sóc cơ thể tại khu spa'),
+('SV005', 'Bữa Tối Buffet', 280000, TRUE, 'Buffet tối với hải sản và món đặc sản địa phương'),
+('SV006', 'Mini Bar Trong Phòng', 150000, TRUE, 'Đồ uống và snack trong minibar, tính phí theo lần sử dụng');
+
 
 -- PROMOTIONS
-INSERT INTO Promotions (promotion_code, name, discount_value, start_date, end_date, scope, description) VALUES
-('PROMO10', 'New Year Discount', 10.00, '2025-01-01', '2025-02-01', 'invoice', '10% off total invoice'),
-('PROMO20', 'Room Discount', 20.00, '2025-03-01', '2025-04-01', 'room', '20% off room price'),
-('PROMO30', 'Summer Offer', 15.00, '2025-06-01', '2025-07-01', 'service', '15% off all services');
+INSERT INTO Promotions 
+(promotion_code, name, discount_value, start_date, end_date, scope, description) 
+VALUES
+('PROMO10', 'Ưu Đãi Năm Mới 2025', 10.00, '2025-01-01', '2025-02-01', 'invoice', 'Giảm 10% tổng hóa đơn cho tất cả khách lưu trú dịp năm mới'),
+('PROMO20', 'Khuyến Mãi Mùa Xuân', 20.00, '2025-03-01', '2025-04-01', 'room', 'Giảm 20% giá phòng cho các đặt phòng trong mùa xuân'),
+('PROMO15', 'Ưu Đãi Du Lịch Hè', 15.00, '2025-06-01', '2025-07-01', 'service', 'Giảm 15% cho tất cả dịch vụ spa, giặt ủi và ăn uống trong mùa hè');
+
 
 -- BOOKINGS
 INSERT INTO Bookings (user_id, check_in, check_out, status, total_guests) VALUES
@@ -317,13 +326,23 @@ INSERT INTO Invoices (booking_id, staff_id, total_room_cost, total_service_cost,
 
 -- REVIEWS
 INSERT INTO Reviews (booking_id, user_id, room_id, rating, comment) VALUES
-(1, 7, 9, 5, 'Great stay 1'), (2, 19, 16, 5, 'Great stay 2'),
-(3, 2, 24, 4, 'Great stay 3'), (4, 19, 11, 4, 'Great stay 4'),
-(5, 1, 3, 3, 'Great stay 5'), (6, 5, 15, 5, 'Great stay 6'),
-(7, 17, 20, 4, 'Great stay 7'), (8, 11, 25, 5, 'Great stay 8'),
-(9, 7, 23, 4, 'Great stay 9'), (10, 19, 28, 5, 'Great stay 10'),
-(11, 8, 11, 5, 'Great stay 11'), (12, 8, 19, 4, 'Great stay 12'),
-(13, 9, 23, 4, 'Great stay 13'), (14, 14, 5, 4, 'Great stay 14'),
-(15, 17, 27, 4, 'Great stay 15'), (16, 10, 20, 4, 'Great stay 16'),
-(17, 4, 7, 5, 'Great stay 17'), (18, 1, 12, 3, 'Great stay 18'),
-(19, 20, 14, 3, 'Great stay 19'), (20, 14, 11, 4, 'Great stay 20');
+(1, 7, 9, 5, 'Phòng sạch sẽ, nhân viên thân thiện, mình rất hài lòng'),
+(2, 19, 16, 5, 'Suite rộng rãi, minibar đầy đủ, trải nghiệm rất đáng tiền'),
+(3, 2, 24, 4, 'Phòng đẹp, view ổn nhưng cách âm chưa thật sự tốt'),
+(4, 19, 11, 4, 'Giường ngủ êm, vị trí khách sạn thuận tiện đi lại'),
+(5, 1, 3, 3, 'Phòng ổn nhưng điều hòa làm lạnh hơi chậm'),
+(6, 5, 15, 5, 'Nhân viên hỗ trợ nhiệt tình, phòng twin rất thoải mái'),
+(7, 17, 20, 4, 'Không gian yên tĩnh, phù hợp nghỉ dưỡng cuối tuần'),
+(8, 11, 25, 5, 'Buffet sáng ngon, nhiều lựa chọn món ăn'),
+(9, 7, 23, 4, 'Phòng sạch, ánh sáng tốt, sẽ quay lại lần sau'),
+(10, 19, 28, 5, 'Gia đình mình rất thích phòng family này'),
+(11, 8, 11, 5, 'Dịch vụ spa rất thư giãn, đáng để thử'),
+(12, 8, 19, 4, 'Phòng ổn, giá hợp lý so với chất lượng'),
+(13, 9, 23, 4, 'Nhân viên lễ tân thân thiện và hỗ trợ nhanh chóng'),
+(14, 14, 5, 4, 'Phòng deluxe đẹp, nội thất hiện đại'),
+(15, 17, 27, 4, 'Không gian thoáng, giường ngủ khá êm'),
+(16, 10, 20, 4, 'Khách sạn sạch sẽ, gần trung tâm nên rất tiện'),
+(17, 4, 7, 5, 'Rất thích ban công và view buổi tối của phòng'),
+(18, 1, 12, 3, 'Phòng ổn nhưng đang bảo trì nên hơi bất tiện'),
+(19, 20, 14, 3, 'Dịch vụ tốt nhưng hôm đó wifi hơi chậm'),
+(20, 14, 11, 4, 'Trải nghiệm nhìn chung tốt, sẽ giới thiệu cho bạn bè');
