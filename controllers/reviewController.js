@@ -40,10 +40,6 @@ const updateReview = async (req, res) => {
         const review = await db.query('SELECT * FROM Reviews WHERE review_id = $1', [id]);
         if (review.rows.length === 0) return res.status(404).json({ message: 'Review not found' });
 
-        if (!req.user.is_staff && review.rows[0].user_id !== req.user.user_id) {
-            return res.status(403).json({ message: 'Forbidden' });
-        }
-
         const result = await db.query(
             'UPDATE Reviews SET rating = $1, comment = $2 WHERE review_id = $3 RETURNING *',
             [rating, comment, id]
@@ -59,10 +55,6 @@ const deleteReview = async (req, res) => {
     try {
         const review = await db.query('SELECT * FROM Reviews WHERE review_id = $1', [id]);
         if (review.rows.length === 0) return res.status(404).json({ message: 'Review not found' });
-
-        if (!req.user.is_staff && review.rows[0].user_id !== req.user.user_id) {
-            return res.status(403).json({ message: 'Forbidden' });
-        }
 
         await db.query('DELETE FROM Reviews WHERE review_id = $1', [id]);
         res.json({ message: 'Review deleted' });

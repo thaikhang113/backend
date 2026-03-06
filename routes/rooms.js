@@ -1,13 +1,13 @@
 const express = require('express');
 const router = express.Router();
 const roomController = require('../controllers/roomController');
-const { authMiddleware, adminGuard } = require('../middleware/auth');
+const { authMiddleware } = require('../middleware/auth');
 
 router.get('/', roomController.getAllRooms);
 router.get('/:id', roomController.getRoomById);
-router.post('/', authMiddleware, adminGuard, roomController.createRoom);
-router.put('/:id', authMiddleware, adminGuard, roomController.updateRoom);
+router.post('/', authMiddleware, roomController.createRoom);
+router.put('/:id', authMiddleware, roomController.updateRoom);
 router.put('/:id/status', authMiddleware, roomController.updateRoomStatus); // Staff can update status
-router.delete('/:id', authMiddleware, adminGuard, roomController.deleteRoom);
+router.delete('/:id', authMiddleware, roomController.deleteRoom);
 
 module.exports = router;

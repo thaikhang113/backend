@@ -83,16 +83,12 @@ const createBooking = async (req, res) => {
 
 const getBookings = async (req, res) => {
     try {
-        let query = `
+        const query = `
             SELECT b.*, u.username 
             FROM Bookings b
             JOIN Users u ON b.user_id = u.user_id
+            ORDER BY b.booking_date DESC
         `;
-        // Phân quyền: Customer chỉ thấy booking của mình
-        if (!req.user.is_staff) {
-            query += ` WHERE b.user_id = ${req.user.user_id}`;
-        }
-        query += ` ORDER BY b.booking_date DESC`;
 
         const result = await db.query(query);
         res.json(result.rows);
@@ -106,10 +102,6 @@ const getBookingById = async (req, res) => {
     try {
         const result = await db.query('SELECT * FROM Bookings WHERE booking_id = $1', [id]);
         if (result.rows.length === 0) return res.status(404).json({ message: 'Booking not found' });
-
-        if (!req.user.is_staff && result.rows[0].user_id !== req.user.user_id) {
-            return res.status(403).json({ message: 'Forbidden' });
-        }
         res.json(result.rows[0]);
     } catch (err) {
         res.status(500).json({ error: err.message });
@@ -122,10 +114,6 @@ const updateBooking = async (req, res) => {
     try {
         const booking = await db.query('SELECT * FROM Bookings WHERE booking_id = $1', [id]);
         if (booking.rows.length === 0) return res.status(404).json({ message: 'Booking not found' });
-
-        if (!req.user.is_staff && booking.rows[0].user_id !== req.user.user_id) {
-            return res.status(403).json({ message: 'Forbidden' });
-        }
 
         const result = await db.query(
             'UPDATE Bookings SET status = $1, check_in = $2, check_out = $3 WHERE booking_id = $4 RETURNING *',

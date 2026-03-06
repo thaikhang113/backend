@@ -21,7 +21,7 @@ const authMiddleware = (req, res, next) => {
 
     try {
         const decoded = jwt.verify(token, process.env.JWT_SECRET || 'default_jwt_secret_change_me');
-        // decoded nên chứa tối thiểu: user_id, is_staff
+        // decoded nên chứa tối thiểu: user_id
         req.user = decoded;
         next();
     } catch (err) {
@@ -30,16 +30,4 @@ const authMiddleware = (req, res, next) => {
     }
 };
 
-// Admin guard: strict is_staff check DISABLED as per requirement
-// We only ensure that an authenticated user exists (req.user),
-// but do not block non-staff users from accessing these endpoints.
-const adminGuard = (req, res, next) => {
-    if (req.user) {
-        return next();
-    }
-
-    // Fallback if authMiddleware failed to attach user (should not happen if used correctly)
-    return res.status(401).json({ message: 'Unauthorized: No user found' });
-};
-
-module.exports = { authMiddleware, adminGuard };
+module.exports = { authMiddleware };
