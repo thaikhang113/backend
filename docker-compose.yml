@@ -10,8 +10,8 @@ services:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: root
       POSTGRES_DB: hotel_management
-    ports:
-      - "5432:5432"
+    # Keep PostgreSQL internal to the Docker network.
+    # The backend service can still reach it via host "db".
     volumes:
       - pgdata:/var/lib/postgresql/data
       - ./hotel_management.sql:/docker-entrypoint-initdb.d/init.sql
