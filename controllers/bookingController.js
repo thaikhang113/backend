@@ -5,7 +5,7 @@ const createBooking = async (req, res) => {
     const client = await db.pool.connect();
     try {
         await client.query('BEGIN');
-        const { user_id, check_in, check_out, total_guests, room_ids, promotion_code, services } = req.body;
+        const { user_id, check_in, check_out, total_guests, room_ids, promotion_code, services, total_price } = req.body;
 
         // 1. Handle Promotion
         let promotionId = null;
@@ -29,11 +29,11 @@ const createBooking = async (req, res) => {
         }
 
         const bookingQuery = `
-            INSERT INTO Bookings (user_id, check_in, check_out, status, total_guests, promotion_id)
-            VALUES ($1, $2, $3, 'confirmed', $4, $5)
+            INSERT INTO Bookings (user_id, check_in, check_out, status, total_guests, promotion_id, total_price)
+            VALUES ($1, $2, $3, 'confirmed', $4, $5, $6)
             RETURNING booking_id
         `;
-        const bookingRes = await client.query(bookingQuery, [user_id, check_in, check_out, total_guests, promotionId]);
+        const bookingRes = await client.query(bookingQuery, [user_id, check_in, check_out, total_guests, promotionId, total_price]);
         const bookingId = bookingRes.rows[0].booking_id;
 
         for (const roomId of room_ids) {

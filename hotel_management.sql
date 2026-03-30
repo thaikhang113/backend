@@ -239,9 +239,9 @@ INSERT INTO Services (service_code, name, price, availability, description) VALU
 
 -- PROMOTIONS
 INSERT INTO Promotions (promotion_code, name, discount_value, start_date, end_date, scope, description) VALUES
-('PROMO10', 'New Year Discount', 10.00, '2025-01-01', '2025-02-01', 'invoice', '10% off total invoice'),
-('PROMO20', 'Room Discount', 20.00, '2025-03-01', '2025-04-01', 'room', '20% off room price'),
-('PROMO30', 'Summer Offer', 15.00, '2025-06-01', '2025-07-01', 'service', '15% off all services');
+('PROMO10', 'New Year Discount', 10, '2025-01-01', '2025-02-01', 'invoice', '10% off total invoice'),
+('PROMO20', 'Room Discount', 20, '2025-03-01', '2025-04-01', 'room', '20% off room price'),
+('PROMO30', 'Summer Offer', 30, '2025-06-01', '2025-07-01', 'service', '15% off all services');
 
 -- BOOKINGS
 INSERT INTO Bookings (user_id, check_in, check_out, status, total_guests) VALUES
@@ -327,3 +327,74 @@ INSERT INTO Reviews (booking_id, user_id, room_id, rating, comment) VALUES
 (15, 17, 27, 4, 'Great stay 15'), (16, 10, 20, 4, 'Great stay 16'),
 (17, 4, 7, 5, 'Great stay 17'), (18, 1, 12, 3, 'Great stay 18'),
 (19, 20, 14, 3, 'Great stay 19'), (20, 14, 11, 4, 'Great stay 20');
+
+UPDATE Users SET first_name = 'Anh',    last_name = 'Nguyen'   WHERE user_id = 1;
+UPDATE Users SET first_name = 'Minh',   last_name = 'Tran'     WHERE user_id = 2;
+UPDATE Users SET first_name = 'Linh',   last_name = 'Pham'     WHERE user_id = 3;
+UPDATE Users SET first_name = 'Huy',    last_name = 'Le'       WHERE user_id = 4;
+UPDATE Users SET first_name = 'Thao',   last_name = 'Vo'       WHERE user_id = 5;
+UPDATE Users SET first_name = 'Khanh',  last_name = 'Bui'      WHERE user_id = 6;
+UPDATE Users SET first_name = 'Nhi',    last_name = 'Dang'     WHERE user_id = 7;
+UPDATE Users SET first_name = 'Duc',    last_name = 'Hoang'    WHERE user_id = 8;
+UPDATE Users SET first_name = 'Trang',  last_name = 'Do'       WHERE user_id = 9;
+UPDATE Users SET first_name = 'Quang',  last_name = 'Phan'     WHERE user_id = 10;
+UPDATE Users SET first_name = 'My',     last_name = 'Huynh'    WHERE user_id = 11;
+UPDATE Users SET first_name = 'Bao',    last_name = 'Ly'       WHERE user_id = 12;
+UPDATE Users SET first_name = 'Yen',    last_name = 'Ngo'      WHERE user_id = 13;
+UPDATE Users SET first_name = 'Tuan',   last_name = 'Truong'   WHERE user_id = 14;
+UPDATE Users SET first_name = 'Ha',     last_name = 'Mai'      WHERE user_id = 15;
+UPDATE Users SET first_name = 'Nam',    last_name = 'Cao'      WHERE user_id = 16;
+UPDATE Users SET first_name = 'Phuong', last_name = 'Luong'    WHERE user_id = 17;
+UPDATE Users SET first_name = 'Long',   last_name = 'Vu'       WHERE user_id = 18;
+UPDATE Users SET first_name = 'Thu',    last_name = 'Dinh'     WHERE user_id = 19;
+UPDATE Users SET first_name = 'Dat',    last_name = 'Chau'     WHERE user_id = 20;
+UPDATE Rooms SET description = 'Cozy family room' WHERE room_id = 1;
+UPDATE Rooms SET description = 'Bright standard room' WHERE room_id = 2;
+UPDATE Rooms SET description = 'Spacious luxury suite' WHERE room_id = 3;
+UPDATE Rooms SET description = 'Deluxe room with city view' WHERE room_id = 4;
+UPDATE Rooms SET description = 'Modern deluxe comfort' WHERE room_id = 5;
+UPDATE Rooms SET description = 'Quiet premium suite' WHERE room_id = 6;
+UPDATE Rooms SET description = 'Large suite for groups' WHERE room_id = 7;
+UPDATE Rooms SET description = 'Simple and clean standard room' WHERE room_id = 8;
+UPDATE Rooms SET description = 'Business room with work desk' WHERE room_id = 9;
+UPDATE Rooms SET description = 'Comfortable business stay' WHERE room_id = 10;
+UPDATE Rooms SET description = 'Warm family room' WHERE room_id = 11;
+UPDATE Rooms SET description = 'Elegant deluxe room' WHERE room_id = 12;
+UPDATE Rooms SET description = 'Modern suite with lounge' WHERE room_id = 13;
+UPDATE Rooms SET description = 'Quiet business room' WHERE room_id = 14;
+UPDATE Rooms SET description = 'Spacious family stay' WHERE room_id = 15;
+UPDATE Rooms SET description = 'Compact room for business' WHERE room_id = 16;
+UPDATE Rooms SET description = 'Fresh standard comfort' WHERE room_id = 17;
+UPDATE Rooms SET description = 'Relaxing deluxe stay' WHERE room_id = 18;
+UPDATE Rooms SET description = 'Comfortable suite retreat' WHERE room_id = 19;
+UPDATE Rooms SET description = 'Stylish deluxe interior' WHERE room_id = 20;
+UPDATE Rooms SET description = 'Upscale spacious suite' WHERE room_id = 21;
+UPDATE Rooms SET description = 'Bright and cozy deluxe room' WHERE room_id = 22;
+UPDATE Rooms SET description = 'Family room with open space' WHERE room_id = 23;
+UPDATE Rooms SET description = 'Minimalist standard room' WHERE room_id = 24;
+UPDATE Rooms SET description = 'Warm deluxe comfort' WHERE room_id = 25;
+UPDATE Rooms SET description = 'Standard room for short stays' WHERE room_id = 26;
+UPDATE Rooms SET description = 'Inviting deluxe room' WHERE room_id = 27;
+UPDATE Rooms SET description = 'Practical family room' WHERE room_id = 28;
+UPDATE Rooms SET description = 'Calm standard stay' WHERE room_id = 29;
+UPDATE Rooms SET description = 'Modern business comfort' WHERE room_id = 30;
+UPDATE Users SET username = 'anh.nguyen'    WHERE user_id = 1;
+UPDATE Users SET username = 'minh.tran'     WHERE user_id = 2;
+UPDATE Users SET username = 'linh.pham'     WHERE user_id = 3;
+UPDATE Users SET username = 'huy.le'        WHERE user_id = 4;
+UPDATE Users SET username = 'thao.vo'       WHERE user_id = 5;
+UPDATE Users SET username = 'khanh.bui'     WHERE user_id = 6;
+UPDATE Users SET username = 'nhi.dang'      WHERE user_id = 7;
+UPDATE Users SET username = 'duc.hoang'     WHERE user_id = 8;
+UPDATE Users SET username = 'trang.do'      WHERE user_id = 9;
+UPDATE Users SET username = 'quang.phan'    WHERE user_id = 10;
+UPDATE Users SET username = 'my.huynh'      WHERE user_id = 11;
+UPDATE Users SET username = 'bao.ly'        WHERE user_id = 12;
+UPDATE Users SET username = 'yen.ngo'       WHERE user_id = 13;
+UPDATE Users SET username = 'tuan.truong'   WHERE user_id = 14;
+UPDATE Users SET username = 'ha.mai'        WHERE user_id = 15;
+UPDATE Users SET username = 'nam.cao'       WHERE user_id = 16;
+UPDATE Users SET username = 'phuong.luong'  WHERE user_id = 17;
+UPDATE Users SET username = 'long.vu'       WHERE user_id = 18;
+UPDATE Users SET username = 'thu.dinh'      WHERE user_id = 19;
+UPDATE Users SET username = 'dat.chau'      WHERE user_id = 20;

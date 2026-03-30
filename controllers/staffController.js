@@ -3,7 +3,7 @@ const crypto = require('crypto');
 
 const getAllStaff = async (req, res) => {
     try {
-        const result = await db.query('SELECT user_id, username, email, first_name, last_name, phone_number, is_active FROM Users WHERE is_staff = TRUE');
+        const result = await db.query('SELECT user_id, username, email,password_hash, first_name, last_name, phone_number, is_active FROM Users WHERE is_staff = TRUE');
         res.json(result.rows);
     } catch (err) {
         res.status(500).json({ error: err.message });

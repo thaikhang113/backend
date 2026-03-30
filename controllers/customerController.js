@@ -66,7 +66,7 @@ const getAllCustomers = async (req, res) => {
     }
 };
 const login = async (req, res) => {
-    try {
+   try {
         const { email, password } = req.body;
 
         if (!email || !password) {
@@ -85,9 +85,10 @@ const login = async (req, res) => {
                 message: "Invalid email or password"
             });
         }
-
+	const user = result.rows[0];
         res.json({
-            message: "Login successful"
+            message: "Login successful",
+		user: user
         });
 
     } catch (err) {
