@@ -58,6 +58,8 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     if: github.ref == 'refs/heads/main'
+    environment: production
+    concurrency: production-deploy
     env:
       VPS_HOST: ${{ secrets.VPS_HOST }}
       VPS_USER: ${{ secrets.VPS_USER }}
@@ -113,8 +115,8 @@ jobs:
             printf '%s\n' "$DEPLOY_COMMAND"
           } > deploy.remote.sh
 
-          ssh -i ~/.ssh/id_ed25519 -p "${VPS_PORT:-22}" -o StrictHostKeyChecking=yes "$VPS_USER@$VPS_HOST" 'bash -s' < deploy.remote.sh
+          ssh -i ~/.ssh/id_ed25519 -p "${VPS_PORT:-22}" -o IdentitiesOnly=yes -o BatchMode=yes -o StrictHostKeyChecking=yes "$VPS_USER@$VPS_HOST" 'bash -s' < deploy.remote.sh
 
       - name: Deployment skipped
         if: steps.deploy-check.outputs.should_deploy != 'true'
-        run: echo "Image was published. Add VPS_HOST, VPS_USER, VPS_SSH_KEY and DEPLOY_COMMAND secrets to enable VPS deployment."
+        run: echo "Image was published. Add production environment secrets VPS_HOST, VPS_USER, VPS_SSH_KEY and DEPLOY_COMMAND to enable VPS deployment."

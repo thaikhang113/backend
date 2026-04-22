@@ -131,6 +131,8 @@ Repo đã được cấu hình GitHub Actions với 2 pipeline:
 
 Pipeline `CD` có sẵn bước deploy lên VPS qua SSH, nhưng chỉ chạy khi bạn cấu hình đủ secrets trong GitHub repository.
 
+Để tránh lộ thông tin VPS, nên cấu hình các secret này trong `GitHub Settings -> Environments -> production -> Secrets`, không đặt trực tiếp trong file workflow.
+
 ### Secrets cần cấu hình
 
 Cho publish image lên GHCR:
@@ -146,6 +148,14 @@ Cho deploy lên VPS qua SSH:
 - `DEPLOY_COMMAND`: lệnh deploy chạy trên server
 - `GHCR_USERNAME`: tên đăng nhập GitHub hoặc tài khoản có quyền pull package từ GHCR, nếu lệnh deploy cần `docker login`
 - `GHCR_TOKEN`: token dùng để pull image private từ GHCR, nếu lệnh deploy cần `docker login`
+
+Khuyến nghị bảo mật:
+
+- Không dùng `root` để deploy. Tạo user riêng, ví dụ `deploy`.
+- Không dùng mật khẩu SSH trong CI/CD. Chỉ dùng SSH key.
+- Không commit IP, user, password, private key hoặc file `.env` production vào repo.
+- Nên bật approval cho environment `production` để mỗi lần deploy cần xác nhận thủ công.
+- Nếu cần, giới hạn IP được phép SSH vào VPS bằng firewall.
 
 Khi bước deploy chạy, workflow sẽ export sẵn các biến này trên VPS:
 
