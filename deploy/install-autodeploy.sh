@@ -17,6 +17,11 @@ if [ ! -f "$APP_DIR/.env" ]; then
   cp "$APP_DIR/.env.example" "$APP_DIR/.env"
 fi
 
+if grep -q '^DB_PASSWORD=root$' "$APP_DIR/.env"; then
+  db_password="$(python3 -c 'import secrets; print(secrets.token_hex(24))')"
+  sed -i "s#^DB_PASSWORD=.*#DB_PASSWORD=${db_password}#" "$APP_DIR/.env"
+fi
+
 if grep -q '^JWT_SECRET=your_jwt_secret_key_should_be_long_and_secure$' "$APP_DIR/.env"; then
   jwt_secret="$(python3 -c 'import secrets; print(secrets.token_hex(32))')"
   sed -i "s#^JWT_SECRET=.*#JWT_SECRET=${jwt_secret}#" "$APP_DIR/.env"
