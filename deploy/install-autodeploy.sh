@@ -40,6 +40,7 @@ if command -v nginx >/dev/null 2>&1; then
   systemctl reload nginx
 fi
 
+docker-compose -f "$APP_DIR/docker-compose.prod.yml" rm -sf app || true
 docker-compose -f "$APP_DIR/docker-compose.prod.yml" up -d --build
 
 systemctl daemon-reload

@@ -21,4 +21,5 @@ if [ "$local_head" != "$remote_head" ]; then
   git pull --ff-only origin "$BRANCH"
 fi
 
+docker-compose -f "$COMPOSE_FILE" rm -sf app || true
 docker-compose -f "$COMPOSE_FILE" up -d --build
