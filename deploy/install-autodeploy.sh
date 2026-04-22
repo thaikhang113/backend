@@ -13,6 +13,8 @@ else
   git -C "$APP_DIR" pull --ff-only origin "$BRANCH"
 fi
 
+git -C "$APP_DIR" config core.filemode false
+
 if [ ! -f "$APP_DIR/.env" ]; then
   cp "$APP_DIR/.env.example" "$APP_DIR/.env"
 fi
