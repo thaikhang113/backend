@@ -136,6 +136,7 @@ Repo hiện dùng mô hình:
 - `deploy/backend-autodeploy.service`: systemd service chạy deploy một lần
 - `deploy/backend-autodeploy.timer`: systemd timer chạy định kỳ mỗi phút
 - `deploy/install-autodeploy.sh`: script bootstrap để cài auto deploy trên VPS
+- `deploy/nginx-backend.conf`: reverse proxy mẫu để public backend qua `nginx`
 
 ### Luồng deploy
 
@@ -150,6 +151,7 @@ Repo hiện dùng mô hình:
 - Không commit IP, user, password, private key hoặc file `.env` production vào repo
 - Nếu repo vẫn để public, ai cũng xem được source code nhưng không có dữ liệu truy cập VPS
 - Nên đổi mật khẩu root và ưu tiên SSH key nếu còn truy cập thủ công vào VPS
+- `docker-compose.prod.yml` bind backend vào `127.0.0.1:5000`, còn public traffic nên đi qua `nginx` trên `80/443`
 
 ## Biến môi trường
 

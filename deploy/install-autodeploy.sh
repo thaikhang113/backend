@@ -32,6 +32,12 @@ chmod +x "$APP_DIR/deploy/update.sh"
 install -m 0644 "$APP_DIR/deploy/backend-autodeploy.service" /etc/systemd/system/backend-autodeploy.service
 install -m 0644 "$APP_DIR/deploy/backend-autodeploy.timer" /etc/systemd/system/backend-autodeploy.timer
 
+if command -v nginx >/dev/null 2>&1; then
+  install -m 0644 "$APP_DIR/deploy/nginx-backend.conf" /etc/nginx/conf.d/backend.conf
+  nginx -t
+  systemctl reload nginx
+fi
+
 systemctl daemon-reload
 systemctl enable --now backend-autodeploy.timer
 systemctl start backend-autodeploy.service
