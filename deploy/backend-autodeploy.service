@@ -1,0 +1,9 @@
+[Unit]
+Description=Backend auto deploy service
+After=network-online.target docker.service
+Wants=network-online.target docker.service
+
+[Service]
+Type=oneshot
+WorkingDirectory=/opt/backend
+ExecStart=/opt/backend/deploy/update.sh

@@ -28,6 +28,7 @@ backend/
 |-- .github/workflows/ # CI/CD với GitHub Actions
 |-- config/         # Kết nối database
 |-- controllers/    # Xử lý logic nghiệp vụ
+|-- deploy/         # Script và systemd files cho auto deploy trên VPS
 |-- models/         # Model hỗ trợ
 |-- routes/         # Định nghĩa endpoint
 |-- utils/          # Tiện ích mở rộng
@@ -122,58 +123,33 @@ Khi chạy bằng Docker Compose:
 
 ## CI/CD
 
-Repo đã được cấu hình GitHub Actions với 2 pipeline:
+Repo hiện dùng mô hình:
 
-- `CI`: chạy khi có `push` hoặc `pull_request`, cài dependency, dựng PostgreSQL, import `hotel_management.sql`, build Docker image, khởi động API và smoke test endpoint `/` cùng `/api/rooms`.
-- `CD`: chạy khi merge vào `main` hoặc kích hoạt thủ công, build và push image lên `GHCR` với 2 tag:
-  - `ghcr.io/<owner>/<repo>:latest`
-  - `ghcr.io/<owner>/<repo>:sha-<commit_sha>`
+- `CI` trên GitHub Actions: chạy khi có `push` hoặc `pull_request`, cài dependency, dựng PostgreSQL, import `hotel_management.sql`, build Docker image, khởi động API và smoke test endpoint `/` cùng `/api/rooms`.
+- `CD` trên chính VPS: VPS tự `git fetch` repo theo chu kỳ, nếu có commit mới trên `main` thì tự `git pull` và `docker-compose -f docker-compose.prod.yml up -d --build`.
 
-Pipeline `CD` có sẵn bước deploy lên VPS qua SSH, nhưng chỉ chạy khi bạn cấu hình đủ secrets trong GitHub repository.
+Điểm chính của cách này là GitHub không cần biết IP, user, SSH key hay password của VPS. Toàn bộ thông tin server chỉ nằm trên chính VPS, nên giảm tối đa rủi ro lộ hạ tầng qua repo hoặc GitHub Actions.
 
-Để tránh lộ thông tin VPS, nên cấu hình các secret này trong `GitHub Settings -> Environments -> production -> Secrets`, không đặt trực tiếp trong file workflow.
+### File phục vụ auto deploy
 
-### Secrets cần cấu hình
+- `deploy/update.sh`: script kiểm tra commit mới và tự deploy
+- `deploy/backend-autodeploy.service`: systemd service chạy deploy một lần
+- `deploy/backend-autodeploy.timer`: systemd timer chạy định kỳ mỗi phút
+- `deploy/install-autodeploy.sh`: script bootstrap để cài auto deploy trên VPS
 
-Cho publish image lên GHCR:
+### Luồng deploy
 
-- Không cần secret riêng nếu dùng `GITHUB_TOKEN` mặc định của GitHub Actions và repo cho phép ghi package.
+1. Bạn push code lên `main`
+2. GitHub Actions chạy `CI`
+3. VPS tự kiểm tra repo public theo chu kỳ
+4. Nếu có commit mới, VPS tự kéo code và rebuild container
 
-Cho deploy lên VPS qua SSH:
+### Lưu ý bảo mật
 
-- `VPS_HOST`: địa chỉ IP hoặc domain của server
-- `VPS_USER`: user SSH trên server
-- `VPS_PORT`: cổng SSH, có thể bỏ trống nếu dùng `22`
-- `VPS_SSH_KEY`: private key dùng để SSH vào VPS
-- `DEPLOY_COMMAND`: lệnh deploy chạy trên server
-- `GHCR_USERNAME`: tên đăng nhập GitHub hoặc tài khoản có quyền pull package từ GHCR, nếu lệnh deploy cần `docker login`
-- `GHCR_TOKEN`: token dùng để pull image private từ GHCR, nếu lệnh deploy cần `docker login`
-
-Khuyến nghị bảo mật:
-
-- Không dùng `root` để deploy. Tạo user riêng, ví dụ `deploy`.
-- Không dùng mật khẩu SSH trong CI/CD. Chỉ dùng SSH key.
-- Không commit IP, user, password, private key hoặc file `.env` production vào repo.
-- Nên bật approval cho environment `production` để mỗi lần deploy cần xác nhận thủ công.
-- Nếu cần, giới hạn IP được phép SSH vào VPS bằng firewall.
-
-Khi bước deploy chạy, workflow sẽ export sẵn các biến này trên VPS:
-
-- `IMAGE`: image vừa được publish, ví dụ `ghcr.io/thaikhang113/backend:sha-<commit_sha>`
-- `VERSION`: full commit SHA của lần deploy
-- `GHCR_USERNAME` và `GHCR_TOKEN`: sẽ có sẵn nếu bạn cấu hình 2 secrets tương ứng
-
-Ví dụ `DEPLOY_COMMAND`:
-
-```bash
-cd /opt/backend
-git pull origin main
-echo "$GHCR_TOKEN" | docker login ghcr.io -u "$GHCR_USERNAME" --password-stdin
-docker compose -f docker-compose.prod.yml pull app
-docker compose -f docker-compose.prod.yml up -d
-```
-
-`docker-compose.prod.yml` đã được thêm sẵn trong repo để phục vụ luồng deploy từ image trên GHCR. Trên VPS, bạn chỉ cần có sẵn bản clone của repo, file `.env` phù hợp và token để `docker login` vào GHCR.
+- Không cần lưu bất kỳ thông tin VPS nào trong GitHub repository hoặc GitHub Actions secrets
+- Không commit IP, user, password, private key hoặc file `.env` production vào repo
+- Nếu repo vẫn để public, ai cũng xem được source code nhưng không có dữ liệu truy cập VPS
+- Nên đổi mật khẩu root và ưu tiên SSH key nếu còn truy cập thủ công vào VPS
 
 ## Biến môi trường
 

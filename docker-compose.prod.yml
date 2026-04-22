@@ -19,7 +19,7 @@ services:
       retries: 5
 
   app:
-    image: ${IMAGE:?Set IMAGE before running docker compose}
+    build: .
     container_name: hotel_backend
     restart: always
     ports:
