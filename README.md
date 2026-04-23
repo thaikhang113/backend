@@ -180,3 +180,39 @@ EMAIL_PASS=your-email-password
 - `utils/email.js` và `utils/scheduler.js` hiện đang ở mức mô phỏng/log, chưa phải luồng gửi email production hoàn chỉnh.
 - File `hotel_management.sql` không chỉ tạo bảng mà còn có dữ liệu mẫu để test nhanh.
 - Các route hiện chưa gắn middleware phân quyền đầy đủ, nên phù hợp để tiếp tục mở rộng thêm auth và authorization nếu dùng cho production.
+
+## Customer ID Card Upload
+
+Customer registration now uses `multipart/form-data` on `POST /api/customers`.
+
+Required image fields:
+
+- `id_card_front`
+- `id_card_back`
+
+Uploaded files are stored on disk in `uploads/customers/` and the database stores:
+
+- `Users.id_card_front_image_url`
+- `Users.id_card_back_image_url`
+
+For an existing database, run this migration once:
+
+```bash
+psql -U postgres -d hotel_management -f deploy/add_customer_id_card_images.sql
+```
+
+Example request:
+
+```bash
+curl -X POST http://localhost:5000/api/customers \
+  -F "username=testuser" \
+  -F "password=123456" \
+  -F "email=test@example.com" \
+  -F "first_name=Test" \
+  -F "last_name=User" \
+  -F "phone_number=0123456789" \
+  -F "address=HCM" \
+  -F "date_of_birth=2000-01-01" \
+  -F "id_card_front=@front.jpg" \
+  -F "id_card_back=@back.jpg"
+```
