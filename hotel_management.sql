@@ -18,6 +18,8 @@ CREATE TABLE Users (
     gender VARCHAR(10),
     phone_number VARCHAR(20),
     address VARCHAR(100),
+    id_card_front_image_url TEXT,
+    id_card_back_image_url TEXT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     date_of_birth DATE,
     is_staff BOOLEAN DEFAULT FALSE,

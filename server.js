@@ -1,5 +1,6 @@
 const express = require('express');
 const cors = require('cors');
+const path = require('path');
 require('dotenv').config();
 const db = require('./config/db');
 
@@ -25,6 +26,7 @@ const PORT = process.env.PORT || 5000;
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // Base Route
 app.get('/', (req, res) => {
@@ -45,6 +47,22 @@ app.use('/api/promotions', promotionRoutes);
 
 // Global Error Handler
 app.use((err, req, res, next) => {
+    if (err.code === 'LIMIT_FILE_SIZE') {
+        return res.status(400).json({
+            status: 'error',
+            message: 'Uploaded file is too large',
+            error: err.message
+        });
+    }
+
+    if (err.name === 'MulterError') {
+        return res.status(400).json({
+            status: 'error',
+            message: 'Invalid upload request',
+            error: err.message
+        });
+    }
+
     console.error(err.stack);
     res.status(500).json({ 
         status: 'error', 

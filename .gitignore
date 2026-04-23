@@ -1,5 +1,6 @@
 .env
 Android-OTP-sender/
 node_modules/
+uploads/
 .DS_Store
 *.log
