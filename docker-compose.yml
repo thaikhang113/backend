@@ -28,6 +28,8 @@ services:
     restart: always
     ports:
       - "5000:5000"
+    volumes:
+      - ./uploads:/app/uploads
     environment:
       - DB_HOST=db # Quan trọng: Trong Docker, host là tên service (db), không phải localhost
       - DB_USER=postgres

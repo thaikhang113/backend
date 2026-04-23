@@ -1,5 +1,14 @@
 const db = require('../config/db');
 const crypto = require('crypto');
+const fs = require('fs');
+
+const deleteUploadedFiles = (files = []) => {
+    files.forEach((file) => {
+        if (file && file.path && fs.existsSync(file.path)) {
+            fs.unlinkSync(file.path);
+        }
+    });
+};
 
 const updatePassword = async (req, res) => {
     try {
@@ -39,7 +48,7 @@ const getCustomerByEmail = async (req, res) => {
         const { email } = req.params;
 
         const result = await db.query(
-            'SELECT user_id, username, email, first_name, last_name, phone_number, address, date_of_birth, is_active FROM Users WHERE email = $1 AND is_staff = FALSE',
+            'SELECT user_id, username, email, first_name, last_name, phone_number, address, date_of_birth, id_card_front_image_url, id_card_back_image_url, is_active FROM Users WHERE email = $1 AND is_staff = FALSE',
             [email]
         );
 
@@ -59,7 +68,7 @@ const getCustomerByEmail = async (req, res) => {
 };
 const getAllCustomers = async (req, res) => {
     try {
-        const result = await db.query('SELECT user_id, username, email,password_hash, first_name, last_name, phone_number, address, date_of_birth, is_active FROM Users WHERE is_staff = FALSE');
+        const result = await db.query('SELECT user_id, username, email,password_hash, first_name, last_name, phone_number, address, date_of_birth, id_card_front_image_url, id_card_back_image_url, is_active FROM Users WHERE is_staff = FALSE');
         res.json(result.rows);
     } catch (err) {
         res.status(500).json({ error: err.message });
@@ -110,15 +119,40 @@ const getCustomerById = async (req, res) => {
 
 const createCustomer = async (req, res) => {
     const { username, password, email, first_name, last_name, phone_number, address, date_of_birth } = req.body;
+    const uploadedFiles = [
+        ...(req.files && req.files.id_card_front ? req.files.id_card_front : []),
+        ...(req.files && req.files.id_card_back ? req.files.id_card_back : [])
+    ];
+
     try {
+        const idCardFrontFile = req.files && req.files.id_card_front ? req.files.id_card_front[0] : null;
+        const idCardBackFile = req.files && req.files.id_card_back ? req.files.id_card_back[0] : null;
+
+        if (!idCardFrontFile || !idCardBackFile) {
+            deleteUploadedFiles(uploadedFiles);
+            return res.status(400).json({ error: 'Both id_card_front and id_card_back images are required' });
+        }
+
         const passwordHash = password;
         const query = `
-            INSERT INTO Users (username, password_hash, email, first_name, last_name, phone_number, address, date_of_birth, gender, is_staff)
-            VALUES ($1, $2, $3, $4, $5, $6, $7, $8,'male', FALSE) RETURNING user_id, username;
+            INSERT INTO Users (username, password_hash, email, first_name, last_name, phone_number, address, date_of_birth, gender, is_staff, id_card_front_image_url, id_card_back_image_url)
+            VALUES ($1, $2, $3, $4, $5, $6, $7, $8,'male', FALSE, $9, $10) RETURNING user_id, username, id_card_front_image_url, id_card_back_image_url;
         `;
-        const result = await db.query(query, [username, passwordHash, email, first_name, last_name, phone_number, address, date_of_birth]);
+        const result = await db.query(query, [
+            username,
+            passwordHash,
+            email,
+            first_name,
+            last_name,
+            phone_number,
+            address,
+            date_of_birth,
+            `/uploads/customers/${idCardFrontFile.filename}`,
+            `/uploads/customers/${idCardBackFile.filename}`
+        ]);
         res.status(201).json({ message: 'Customer created', user: result.rows[0] });
     } catch (err) {
+        deleteUploadedFiles(uploadedFiles);
         res.status(500).json({ error: err.message });
     }
 };
